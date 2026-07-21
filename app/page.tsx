@@ -1,65 +1,67 @@
-import Image from "next/image";
+import Link from "next/link";
+import { cases } from "@/lib/data/cases";
+import { getPersona } from "@/lib/data/personas";
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="mx-auto max-w-3xl px-4 py-12">
+      <header>
+        <h1 className="text-3xl font-semibold text-[#3A2B26]">Accessible clinical encounters</h1>
+        <p className="mt-3 max-w-2xl leading-relaxed text-[#5A4A40]">
+          Interactive encounters with Deaf and hard-of-hearing patients — practice the communication
+          decisions that determine whether a visit actually works. There is no single Deaf patient:
+          each encounter centers a different person, with their own language, identity, and access needs.
+        </p>
+      </header>
+
+      <section className="mt-8 space-y-4">
+        {cases.map((c) => {
+          const persona = getPersona(c.personaId);
+          return (
+            <Link
+              key={c.id}
+              href={`/case/${c.id}`}
+              className="block rounded-2xl border border-[#E7D6C4] bg-white p-5 transition-all hover:border-[#E88C6E] hover:shadow-sm"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-semibold text-[#3A2B26]">{c.title}</h2>
+                  <p className="mt-1 text-sm text-[#7A6A5E]">{c.setting}</p>
+                </div>
+                <div className="flex shrink-0 flex-col items-end gap-1">
+                  <span className="rounded-full bg-[#F6E3D0] px-3 py-1 text-xs font-medium text-[#8A5A44]">
+                    {c.difficulty}
+                  </span>
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      c.reviewStatus === "expert-reviewed"
+                        ? "bg-[#DFF0EE] text-[#2E6B66]"
+                        : "bg-[#FBE3DA] text-[#A34A2E]"
+                    }`}
+                  >
+                    {c.reviewStatus === "expert-reviewed"
+                      ? "expert reviewed"
+                      : "draft — awaiting Deaf/ASL expert review"}
+                  </span>
+                </div>
+              </div>
+              <p className="mt-3 text-sm leading-relaxed text-[#3A2B26]">
+                <span className="font-medium">{persona.name}</span>, {persona.age} — {persona.language}
+              </p>
+            </Link>
+          );
+        })}
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-5 text-sm leading-relaxed text-[#5A4A40]">
+        <h2 className="font-semibold text-[#3A2B26]">About this project</h2>
+        <p className="mt-2">
+          Deafness here is treated as identity and language, not as deficit. Cases are written to be
+          reviewed by Deaf and ASL-fluent experts, and the badge on each case tells you honestly
+          where it stands. Illustrations never depict signing; faithful ASL belongs to real signers
+          on video, which these cases are structured to incorporate.
+        </p>
+      </section>
     </div>
   );
 }
