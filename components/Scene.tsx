@@ -226,26 +226,40 @@ function VriCart({ mood }: { mood: Mood }) {
   );
 }
 
-/** Patient lying on a gurney, centered on x=0: head on pillow, blanket from the neck down. */
+/**
+ * Patient in a semi-reclined hospital bed, centered on x=0. The raised
+ * backrest lets the face read naturally while clearly "in bed."
+ */
 function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Mood; skin?: string; hair?: string }) {
   return (
     <g>
+      {/* legs + wheels */}
       <rect x="-52" y="271" width="7" height="52" fill="#8A857C" />
       <rect x="45" y="271" width="7" height="52" fill="#8A857C" />
       <circle cx="-48" cy="325" r="5" fill="#6E6A62" />
       <circle cx="48" cy="325" r="5" fill="#6E6A62" />
+      {/* frame + mattress */}
       <rect x="-62" y="262" width="124" height="10" rx="3" fill="#B8B2A8" />
       <rect x="-62" y="248" width="124" height="15" rx="7" fill="#F2EEE7" />
-      <rect x="-60" y="237" width="36" height="14" rx="7" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
-      <ellipse cx="18" cy="240" rx="16" ry="7" fill="#BFD3DC" />
-      <rect x="-27" y="236" width="87" height="17" rx="8" fill="#BFD3DC" />
-      <line x1="-25" y1="250" x2="56" y2="250" stroke="#A8BEC8" strokeWidth="1.5" />
-      <circle cx="-42" cy="228" r="15" fill={skin} />
-      <path
-        d="M-56 226 Q-57 213 -42 212 Q-27 213 -28 226 L-28 220 Q-28 216 -42 216 Q-56 216 -56 220 Z"
-        fill={hair}
-      />
-      <Face hx={-42} hy={230} mood={mood} skin={skin} />
+      {/* raised backrest with pillow, patient reclining against it */}
+      <g transform="rotate(-28 -38 252)">
+        <rect x="-54" y="196" width="32" height="58" rx="8" fill="#F2EEE7" />
+        <rect x="-51" y="200" width="26" height="18" rx="8" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
+        <rect x="-50" y="216" width="24" height="38" rx="9" fill="#D8E4E8" />
+        <circle cx="-38" cy="188" r="13" fill={skin} />
+        <path
+          d="M-50 186 Q-51 175 -38 174 Q-25 175 -26 186 L-26 181 Q-26 177 -38 177 Q-50 177 -50 181 Z"
+          fill={hair}
+        />
+        <g transform="scale(0.85) translate(-6.7 33.2)">
+          <Face hx={-38} hy={190} mood={mood} skin={skin} />
+        </g>
+      </g>
+      {/* blanket over torso and legs, with knee mound and foot bump */}
+      <ellipse cx="20" cy="240" rx="15" ry="7" fill="#BFD3DC" />
+      <rect x="-22" y="238" width="82" height="15" rx="7" fill="#BFD3DC" />
+      <ellipse cx="52" cy="242" rx="8" ry="5" fill="#BFD3DC" />
+      <line x1="-18" y1="249" x2="56" y2="249" stroke="#A8BEC8" strokeWidth="1.5" />
     </g>
   );
 }

@@ -105,6 +105,17 @@ export async function latestInProgress(
   return (data as AttemptRow) ?? null;
 }
 
+export async function getAttempt(attemptId: string): Promise<AttemptRow | null> {
+  const supabase = getSupabase();
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("attempts")
+    .select("*")
+    .eq("id", attemptId)
+    .maybeSingle();
+  return (data as AttemptRow) ?? null;
+}
+
 export async function listAttempts(userId: string): Promise<AttemptRow[]> {
   const supabase = getSupabase();
   if (!supabase) return [];
