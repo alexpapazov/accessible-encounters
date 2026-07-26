@@ -226,25 +226,26 @@ function VriCart({ mood }: { mood: Mood }) {
   );
 }
 
-/** Patient lying on a gurney, centered on x=0. */
+/** Patient lying on a gurney, centered on x=0: head on pillow, blanket from the neck down. */
 function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Mood; skin?: string; hair?: string }) {
   return (
     <g>
-      <rect x="-70" y="262" width="140" height="10" rx="3" fill="#B8B2A8" />
-      <rect x="-62" y="272" width="8" height="52" fill="#8A857C" />
-      <rect x="54" y="272" width="8" height="52" fill="#8A857C" />
-      <circle cx="-58" cy="326" r="5" fill="#6E6A62" />
-      <circle cx="58" cy="326" r="5" fill="#6E6A62" />
-      <rect x="-70" y="246" width="140" height="18" rx="8" fill="#F2EEE7" />
-      <rect x="-70" y="238" width="18" height="14" rx="6" fill="#E4DDD1" />
-      <g transform="translate(-46,0)">
-        <circle cx="0" cy="243" r="16" fill={skin} />
-        <path d="M-15 240 Q-16 226 0 225 Q16 226 15 240 L15 236 Q15 229 0 229 Q-15 229 -15 236 Z" fill={hair} />
-        <g transform="scale(0.75) translate(15.4, 81)">
-          <Face hx={0} hy={243} mood={mood} skin={skin} />
-        </g>
-      </g>
-      <rect x="-26" y="240" width="88" height="16" rx="8" fill="#D8E4E8" />
+      <rect x="-52" y="271" width="7" height="52" fill="#8A857C" />
+      <rect x="45" y="271" width="7" height="52" fill="#8A857C" />
+      <circle cx="-48" cy="325" r="5" fill="#6E6A62" />
+      <circle cx="48" cy="325" r="5" fill="#6E6A62" />
+      <rect x="-62" y="262" width="124" height="10" rx="3" fill="#B8B2A8" />
+      <rect x="-62" y="248" width="124" height="15" rx="7" fill="#F2EEE7" />
+      <rect x="-60" y="237" width="36" height="14" rx="7" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
+      <ellipse cx="18" cy="240" rx="16" ry="7" fill="#BFD3DC" />
+      <rect x="-27" y="236" width="87" height="17" rx="8" fill="#BFD3DC" />
+      <line x1="-25" y1="250" x2="56" y2="250" stroke="#A8BEC8" strokeWidth="1.5" />
+      <circle cx="-42" cy="228" r="15" fill={skin} />
+      <path
+        d="M-56 226 Q-57 213 -42 212 Q-27 213 -28 226 L-28 220 Q-28 216 -42 216 Q-56 216 -56 220 Z"
+        fill={hair}
+      />
+      <Face hx={-42} hy={230} mood={mood} skin={skin} />
     </g>
   );
 }
@@ -371,12 +372,13 @@ export default function Scene({ scene, characters, timeOfDay = "afternoon", scen
         </g>
       )}
 
-      {/* Night interior lamp */}
+      {/* Night interior lamp — floor lamp, standing clear at the far left */}
       {isNight && (
         <g>
-          <circle cx="52" cy="252" r="26" fill="#F5D98A" opacity="0.4" />
-          <rect x="49" y="252" width="6" height="46" fill="#4A4038" />
-          <path d="M39 252 L65 252 L59 238 L45 238 Z" fill="#E8C86E" />
+          <circle cx="30" cy="242" r="18" fill="#F5D98A" opacity="0.35" />
+          <rect x="27" y="248" width="6" height="50" fill="#4A4038" />
+          <rect x="18" y="296" width="24" height="5" rx="2" fill="#4A4038" />
+          <path d="M18 248 L42 248 L37 234 L23 234 Z" fill="#E8C86E" />
         </g>
       )}
 

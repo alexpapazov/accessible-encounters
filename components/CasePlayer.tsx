@@ -1,13 +1,26 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useAuth } from "./AuthProvider";
+import {
+  abandonAttempt,
+  completeAttempt,
+  createAttempt,
+  latestInProgress,
+  saveProgress,
+  type AttemptRow,
+} from "@/lib/attempts";
 import type {
+  CaseMode,
   CaseNode,
   Choice,
   ClinicalCase,
+  Condition,
   DelayedOutcome,
+  Effects,
   MetricState,
+  NextRule,
   PathStep,
 } from "@/lib/types";
 import { METRICS, STAKEHOLDERS, initialMetrics, metricsFor } from "@/lib/types";
@@ -20,8 +33,8 @@ import {
   resolveNext,
   stakeholderTotals,
 } from "@/lib/engine";
-import type { Condition } from "@/lib/types";
 import type { EvalContext } from "@/lib/engine";
+import Scene from "./Scene";
 
 function evalConditionSafe(cond: Condition, ctx: EvalContext): boolean {
   try {
@@ -30,7 +43,6 @@ function evalConditionSafe(cond: Condition, ctx: EvalContext): boolean {
     return false;
   }
 }
-import Scene from "./Scene";
 
 interface Props {
   clinicalCase: ClinicalCase;
@@ -39,11 +51,20 @@ interface Props {
 type Phase =
   | { kind: "node" }
   | { kind: "feedback"; choice: Choice }
+  /** Timed mode: metric chips flash briefly, then auto-advance. */
+  | { kind: "chips"; effects: Effects; next: NextRule[]; inactionText?: string }
   | { kind: "daybreak"; toNodeId: string; delivered: DelayedOutcome[] };
 
 const metricLabel = (key: string) => METRICS.find((m) => m.key === key)?.label ?? key;
 
+const GRACE_MS = 2000;
+const CHIPS_MS = 2400;
+
 export default function CasePlayer({ clinicalCase: c }: Props) {
+  const { enabled: authEnabled, loading: authLoading, user } = useAuth();
+  const [mode, setMode] = useState<CaseMode | null>(
+    c.modes.length === 1 ? c.modes[0] : null
+  );
   const [nodeId, setNodeId] = useState(c.startNodeId);
   const [metrics, setMetrics] = useState<MetricState>(initialMetrics);
   const [clock, setClock] = useState(0);
@@ -53,49 +74,147 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   const [arrivals, setArrivals] = useState<DelayedOutcome[]>([]);
   const [showPerspectives, setShowPerspectives] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [resumeOffer, setResumeOffer] = useState<AttemptRow | null>(null);
+  const [timerFraction, setTimerFraction] = useState<number | null>(null);
+  const [liveHesMin, setLiveHesMin] = useState(0);
   const nodeShownAt = useRef<number>(Date.now());
+  const attemptId = useRef<string | null>(null);
+  const completed = useRef(false);
+  const firedTimeout = useRef(false);
 
   const node = nodeById(c, nodeId);
   const isTerminal = node.choices.length === 0;
-  const beat = phase.kind === "feedback" ? path.length : path.length + 1;
+  const beat = phase.kind === "node" ? path.length + 1 : path.length;
+  const isTimed = mode === "timed";
+  const hesRate = c.timing?.hesitationSecondsPerScenarioMinute;
 
   const patientChars = useMemo(
     () => c.characters.filter((ch) => ch.role === "patient"),
     [c]
   );
 
-  const choose = (choice: Choice) => {
+  /* ------------------------------------------------------------ */
+  /* Persistence                                                   */
+  /* ------------------------------------------------------------ */
+
+  useEffect(() => {
+    if (!user) return;
+    latestInProgress(user.id, c.id).then((row) => {
+      if (!row) return;
+      const staleVersion = row.case_version !== c.caseVersion;
+      const timedNoResume = row.mode === "timed" && c.timing?.leavingEndsAttempt;
+      if (staleVersion || timedNoResume || !row.state) abandonAttempt(row.id);
+      else setResumeOffer(row);
+    });
+  }, [user, c.id, c.caseVersion, c.timing?.leavingEndsAttempt]);
+
+  useEffect(() => {
+    if (!attemptId.current || completed.current) return;
+    if (phase.kind !== "node" || path.length === 0 || isTerminal) return;
+    saveProgress(attemptId.current, { nodeId, metrics, clock, path, queue });
+  }, [nodeId, phase.kind, path, metrics, clock, queue, isTerminal]);
+
+  useEffect(() => {
+    if (!isTerminal || completed.current || !attemptId.current) return;
+    completed.current = true;
+    completeAttempt(attemptId.current, metrics, path, node.outcomeSummary);
+  }, [isTerminal, metrics, path, node.outcomeSummary]);
+
+  /* ------------------------------------------------------------ */
+  /* Core decision flow                                            */
+  /* ------------------------------------------------------------ */
+
+  const choose = (choice: Choice, opts: { timedOut?: boolean } = {}) => {
+    if (user && !attemptId.current && path.length === 0 && mode) {
+      createAttempt(user.id, c.id, c.caseVersion, mode).then((id) => {
+        attemptId.current = id;
+      });
+      if (resumeOffer) {
+        abandonAttempt(resumeOffer.id);
+        setResumeOffer(null);
+      }
+    }
     const decisionMs = Date.now() - nodeShownAt.current;
-    const newClock = clock + (choice.timeCost ?? 0);
-    const newMetrics = applyEffects(metrics, choice.effects);
+    const elapsedSec = decisionMs / 1000;
+    const hesMin = isTimed && hesRate ? Math.floor(elapsedSec / hesRate) : 0;
+    const newClock = clock + hesMin + (choice.timeCost ?? 0);
+
+    /* Merge authored effects with timing-derived operational efficiency. */
+    const effects: Effects = { ...choice.effects };
+    if (isTimed && !opts.timedOut) {
+      const speed = c.timing?.decisionSpeed?.find((t) => elapsedSec <= t.withinSeconds);
+      if (speed)
+        effects.operationalEfficiency = (effects.operationalEfficiency ?? 0) + speed.delta;
+    }
+    const milestone = c.timing?.milestones?.find((m) => m.onChoiceId === choice.id);
+    if (milestone) {
+      const tier = milestone.tiers.find((t) => newClock <= t.byMinute);
+      if (tier)
+        effects.operationalEfficiency = (effects.operationalEfficiency ?? 0) + tier.delta;
+    }
+
+    const newMetrics = applyEffects(metrics, effects);
     const ctx = { metrics: newMetrics, scenarioClock: newClock, path };
     const rule = resolveNext(choice.next, ctx);
     setMetrics(newMetrics);
     setClock(newClock);
+    setLiveHesMin(0);
     setPath((p) => [
       ...p,
       {
         nodeId: node.id,
-        resolution: { choiceId: choice.id, timedOut: false },
+        resolution: { choiceId: choice.id, timedOut: opts.timedOut ?? false },
         decisionMs,
         scenarioClockAfter: newClock,
-        effectsApplied: choice.effects,
+        effectsApplied: effects,
         branchReason: rule.reason,
       },
     ]);
     if (choice.feedback.delayed?.length) {
       setQueue((q) => [...q, ...choice.feedback.delayed!]);
     }
-    setPhase({ kind: "feedback", choice });
+    setPhase(
+      isTimed
+        ? { kind: "chips", effects, next: choice.next }
+        : { kind: "feedback", choice }
+    );
   };
 
-  const advance = () => {
-    if (phase.kind !== "feedback") return;
-    const rule = resolveNext(phase.choice.next, { metrics, scenarioClock: clock, path });
+  const handleTimeout = () => {
+    if (node.inactionOutcome) {
+      const io = node.inactionOutcome;
+      const decisionMs = Date.now() - nodeShownAt.current;
+      const hesMin = hesRate ? Math.floor(decisionMs / 1000 / hesRate) : 0;
+      const newClock = clock + hesMin;
+      const newMetrics = applyEffects(metrics, io.effects);
+      setMetrics(newMetrics);
+      setClock(newClock);
+      setLiveHesMin(0);
+      setPath((p) => [
+        ...p,
+        {
+          nodeId: node.id,
+          resolution: { inaction: true },
+          decisionMs,
+          scenarioClockAfter: newClock,
+          effectsApplied: io.effects,
+        },
+      ]);
+      if (io.feedback.delayed?.length) setQueue((q) => [...q, ...io.feedback.delayed!]);
+      setPhase({ kind: "chips", effects: io.effects, next: io.next, inactionText: io.text });
+      return;
+    }
+    const saver = node.choices.find((ch) => ch.timeSaver);
+    if (saver) choose(saver, { timedOut: true });
+  };
+  const latestTimeout = useRef(handleTimeout);
+  latestTimeout.current = handleTimeout;
+
+  const advanceRules = (rules: NextRule[]) => {
+    const rule = resolveNext(rules, { metrics, scenarioClock: clock, path });
     const target = nodeById(c, rule.nodeId);
     const dayChanged =
       target.day !== undefined && node.day !== undefined && target.day > node.day;
-
     if (dayChanged && target.dayBreak) {
       const due = dueDelayed(queue, { kind: "dayBreak", toDay: target.day! });
       deliver(due);
@@ -115,6 +234,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     setNodeId(id);
     setPhase({ kind: "node" });
     setShowPerspectives(false);
+    firedTimeout.current = false;
     nodeShownAt.current = Date.now();
   };
 
@@ -125,6 +245,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   };
 
   const restart = () => {
+    if (attemptId.current && !completed.current) abandonAttempt(attemptId.current);
+    attemptId.current = null;
+    completed.current = false;
+    firedTimeout.current = false;
+    setMode(c.modes.length === 1 ? c.modes[0] : null);
     setNodeId(c.startNodeId);
     setMetrics(initialMetrics());
     setClock(0);
@@ -133,10 +258,135 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     setQueue([]);
     setArrivals([]);
     setShowPerspectives(false);
+    setTimerFraction(null);
+    setLiveHesMin(0);
     nodeShownAt.current = Date.now();
   };
 
-  /* ---------- day-break interstitial ---------- */
+  const resume = () => {
+    if (!resumeOffer?.state) return;
+    const s = resumeOffer.state;
+    attemptId.current = resumeOffer.id;
+    setMode(resumeOffer.mode);
+    setNodeId(s.nodeId);
+    setMetrics(s.metrics);
+    setClock(s.clock);
+    setPath(s.path);
+    setQueue(s.queue);
+    setPhase({ kind: "node" });
+    setResumeOffer(null);
+    nodeShownAt.current = Date.now();
+  };
+
+  /* ------------------------------------------------------------ */
+  /* Timed-mode clockwork                                          */
+  /* ------------------------------------------------------------ */
+
+  const timerActive =
+    isTimed && phase.kind === "node" && !isTerminal && !!node.timerSeconds;
+
+  useEffect(() => {
+    if (!timerActive) {
+      setTimerFraction(null);
+      return;
+    }
+    const total = node.timerSeconds! * 1000;
+    const tick = () => {
+      const sinceShown = Date.now() - nodeShownAt.current;
+      const elapsed = sinceShown - GRACE_MS;
+      const fraction = Math.max(0, 1 - Math.max(0, elapsed) / total);
+      setTimerFraction(fraction);
+      if (hesRate) setLiveHesMin(Math.floor(sinceShown / 1000 / hesRate));
+      if (fraction <= 0 && !firedTimeout.current) {
+        firedTimeout.current = true;
+        latestTimeout.current();
+      }
+    };
+    tick();
+    const interval = setInterval(tick, 100);
+    return () => clearInterval(interval);
+  }, [timerActive, nodeId, node.timerSeconds, hesRate]);
+
+  /* Chips flash briefly, then the world moves on. */
+  useEffect(() => {
+    if (phase.kind !== "chips") return;
+    const t = setTimeout(() => advanceRules(phase.next), CHIPS_MS);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  /* ------------------------------------------------------------ */
+  /* Gates and pickers                                             */
+  /* ------------------------------------------------------------ */
+
+  if (authEnabled && !authLoading && !user) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+        <h1 className="text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
+        <p className="mx-auto mt-3 max-w-md leading-relaxed text-[#5A4A40]">
+          Sign in to play this encounter — your decisions, timing, and outcomes
+          are saved so you can review them and explore other paths.
+        </p>
+        <Link
+          href="/signin"
+          className="mt-6 inline-block rounded-xl bg-[#E88C6E] px-6 py-3 font-medium text-white transition-colors hover:bg-[#D97B5D]"
+        >
+          Sign in to begin
+        </Link>
+      </div>
+    );
+  }
+
+  if (mode === null) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
+          ← All encounters
+        </Link>
+        <h1 className="mt-1 text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
+        <p className="mt-1 text-sm text-[#7A6A5E]">{c.setting}</p>
+        <p className="mt-4 leading-relaxed text-[#3A2B26]">How do you want to face this shift?</p>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <button
+            onClick={() => setMode("deliberative")}
+            aria-label="Play in deliberative mode — no countdown"
+            className="rounded-2xl border border-[#E7D6C4] bg-white p-5 text-left transition-all hover:border-[#4FA39C] hover:shadow-sm"
+          >
+            <p className="text-lg font-semibold text-[#3A2B26]">Deliberative</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#5A4A40]">
+              No countdown. Sit with each decision as long as you need — this
+              mode reveals what you value when nothing forces your hand.
+            </p>
+          </button>
+          <button
+            onClick={() => setMode("timed")}
+            aria-label="Play in time-constrained mode — decisions expire"
+            className="rounded-2xl border border-[#E7D6C4] bg-white p-5 text-left transition-all hover:border-[#E88C6E] hover:shadow-sm"
+          >
+            <p className="text-lg font-semibold text-[#3A2B26]">Time-constrained</p>
+            <p className="mt-2 text-sm leading-relaxed text-[#5A4A40]">
+              Decisions expire. While you deliberate, the ward keeps moving —
+              and if the bar empties, the system decides for you.
+            </p>
+            {c.timing?.leavingEndsAttempt && (
+              <p className="mt-2 text-xs font-medium text-[#A34A2E]">
+                Leaving this scenario mid-run ends the attempt.
+              </p>
+            )}
+          </button>
+        </div>
+        <p className="mt-4 text-sm leading-relaxed text-[#7A6A5E]">
+          Play both and compare on your dashboard: the point of this case is
+          what time pressure does to the same values.
+        </p>
+      </div>
+    );
+  }
+
+  /* ------------------------------------------------------------ */
+  /* Interstitials and results                                     */
+  /* ------------------------------------------------------------ */
+
   if (phase.kind === "daybreak") {
     const target = nodeById(c, phase.toNodeId);
     return (
@@ -176,11 +426,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     );
   }
 
-  /* ---------- results ---------- */
   if (isTerminal) {
     return (
       <Results
         clinicalCase={c}
+        mode={mode}
         metrics={metrics}
         path={path}
         clock={clock}
@@ -191,7 +441,16 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     );
   }
 
-  /* ---------- scene with dialogue bubble preview ---------- */
+  /* ------------------------------------------------------------ */
+  /* Node view                                                     */
+  /* ------------------------------------------------------------ */
+
+  const situation =
+    isTimed && node.timedOverrides?.situation ? node.timedOverrides.situation : node.situation;
+  const perspectives =
+    isTimed && node.timedOverrides?.hidePerspectives ? [] : (node.perspectives ?? []);
+  const displayClock = clock + liveHesMin;
+
   const sceneBubbles = [
     ...(node.scene.bubbles ?? []),
     ...(phase.kind === "feedback" && phase.choice.dialogue
@@ -200,162 +459,237 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
-      <header className="mb-4 flex items-baseline justify-between gap-4">
-        <div>
-          <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
-            ← All encounters
-          </Link>
-          <h1 className="mt-1 text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
-          <p className="text-sm text-[#7A6A5E]">{c.setting}</p>
+    <>
+      {timerActive && timerFraction !== null && (
+        <div className="fixed inset-x-0 top-0 z-50 h-2.5 bg-[#F3E8DA]">
+          <div
+            className="h-full transition-[width] duration-100 ease-linear"
+            style={{
+              width: `${timerFraction * 100}%`,
+              backgroundColor:
+                timerFraction > 0.5 ? "#E8C86E" : timerFraction > 0.25 ? "#E8A25E" : "#E86E5E",
+            }}
+          />
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className="rounded-full bg-[#F6E3D0] px-3 py-1 text-xs font-medium text-[#8A5A44]">
-            {node.title} · beat {beat}
-          </span>
-          {(node.day || node.timeOfDay || node.scene.wallClock) && (
-            <span className="rounded-full bg-[#EDE4F0] px-3 py-1 text-xs font-medium text-[#6E5A7A]">
-              {node.day ? `Day ${node.day}` : ""}
-              {node.day && node.timeOfDay ? " · " : ""}
-              {node.timeOfDay ?? ""}
-              {node.scene.wallClock ? ` · T+${clock} min` : ""}
+      )}
+
+      <div className="mx-auto max-w-3xl px-4 py-8">
+        <header className="mb-4 flex items-baseline justify-between gap-4">
+          <div>
+            <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
+              ← All encounters
+            </Link>
+            <h1 className="mt-1 text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
+            <p className="text-sm text-[#7A6A5E]">{c.setting}</p>
+          </div>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <span className="rounded-full bg-[#F6E3D0] px-3 py-1 text-xs font-medium text-[#8A5A44]">
+              {node.title} · beat {beat}
             </span>
+            {(node.day || node.timeOfDay || node.scene.wallClock) && (
+              <span className="rounded-full bg-[#EDE4F0] px-3 py-1 text-xs font-medium text-[#6E5A7A]">
+                {node.day ? `Day ${node.day}` : ""}
+                {node.day && node.timeOfDay ? " · " : ""}
+                {node.timeOfDay ?? ""}
+                {node.scene.wallClock ? ` · T+${displayClock} min` : ""}
+              </span>
+            )}
+            {isTimed && (
+              <span className="rounded-full bg-[#FBE3DA] px-3 py-1 text-xs font-medium text-[#A34A2E]">
+                time-constrained
+              </span>
+            )}
+          </div>
+        </header>
+
+        {resumeOffer && path.length === 0 && (
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#4FA39C] bg-[#EDF6F5] p-4">
+            <p className="text-sm leading-relaxed text-[#2E4B48]">
+              You have an unfinished attempt at{" "}
+              <span className="font-medium">
+                {nodeById(c, resumeOffer.state!.nodeId).title}
+              </span>
+              .
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={resume}
+                className="rounded-full bg-[#4FA39C] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#3E8983]"
+              >
+                Resume
+              </button>
+              <button
+                onClick={() => {
+                  abandonAttempt(resumeOffer.id);
+                  setResumeOffer(null);
+                }}
+                className="rounded-full border border-[#4FA39C] px-4 py-1.5 text-sm font-medium text-[#2E6B66] hover:bg-white"
+              >
+                Start fresh
+              </button>
+            </div>
+          </div>
+        )}
+
+        {node.inlineCaption && (
+          <p className="mb-2 text-sm italic text-[#7A6A5E]">{node.inlineCaption}</p>
+        )}
+
+        <div className="overflow-hidden rounded-2xl border border-[#E7D6C4] shadow-sm">
+          <Scene
+            scene={{ ...node.scene, bubbles: sceneBubbles }}
+            characters={c.characters}
+            timeOfDay={node.timeOfDay}
+            scenarioMinutes={displayClock}
+          />
+        </div>
+
+        {arrivals.length > 0 && phase.kind === "node" && (
+          <div className="mt-3 space-y-2">
+            {arrivals.map((d) => (
+              <div
+                key={d.id}
+                className="rounded-xl border-l-4 border-[#B0716B] bg-[#F7ECEA] p-4 leading-relaxed text-[#4A3230]"
+              >
+                {d.text}
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
+          <p className="leading-relaxed text-[#3A2B26]">{situation}</p>
+
+          {perspectives.length > 0 && (
+            <div className="mt-4">
+              <button
+                onClick={() => setShowPerspectives((v) => !v)}
+                className="rounded-full border border-[#4FA39C] px-4 py-1.5 text-sm font-medium text-[#2E6B66] transition-colors hover:bg-[#4FA39C] hover:text-white"
+              >
+                {showPerspectives ? "Hide" : "See"} what{" "}
+                {perspectives
+                  .map((p) => characterById(c, p.characterId).name.split(" ")[0])
+                  .join(" and ")}{" "}
+                {perspectives.length > 1 ? "are" : "is"} experiencing
+              </button>
+              {showPerspectives &&
+                perspectives.map((p) => (
+                  <blockquote
+                    key={p.characterId}
+                    className="mt-3 rounded-xl border-l-4 border-[#4FA39C] bg-[#EDF6F5] p-4 text-[#2E4B48]"
+                  >
+                    <p className="text-xs font-medium uppercase tracking-wide text-[#2E6B66]">
+                      {characterById(c, p.characterId).name}
+                    </p>
+                    <p className="mt-1">{p.text}</p>
+                  </blockquote>
+                ))}
+            </div>
           )}
         </div>
-      </header>
 
-      {node.inlineCaption && (
-        <p className="mb-2 text-sm italic text-[#7A6A5E]">{node.inlineCaption}</p>
-      )}
+        {phase.kind === "node" && (
+          <div className="mt-4 space-y-3">
+            <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
+              What do you do?
+            </p>
+            {node.choices.map((choice) => (
+              <button
+                key={choice.id}
+                onClick={() => choose(choice)}
+                aria-label={choice.dialogue ? `Say: ${choice.label}` : choice.label}
+                className="block w-full rounded-xl border border-[#E7D6C4] bg-white p-4 text-left leading-snug text-[#3A2B26] transition-all hover:border-[#E88C6E] hover:bg-[#FDF6F0] hover:shadow-sm"
+              >
+                {choice.dialogue ? (
+                  <span>
+                    <span className="mr-2 rounded bg-[#EDE4F0] px-1.5 py-0.5 text-xs font-medium text-[#6E5A7A]">
+                      say
+                    </span>
+                    &ldquo;{choice.label}&rdquo;
+                  </span>
+                ) : (
+                  choice.label
+                )}
+              </button>
+            ))}
+          </div>
+        )}
 
-      <div className="overflow-hidden rounded-2xl border border-[#E7D6C4] shadow-sm">
-        <Scene
-          scene={{ ...node.scene, bubbles: sceneBubbles }}
-          characters={c.characters}
-          timeOfDay={node.timeOfDay}
-          scenarioMinutes={clock}
-        />
-      </div>
+        {phase.kind === "feedback" && (
+          <FeedbackPanel
+            choice={phase.choice}
+            showScores={c.scoring === "standard"}
+            onContinue={() => advanceRules(phase.choice.next)}
+          />
+        )}
 
-      {arrivals.length > 0 && phase.kind === "node" && (
-        <div className="mt-3 space-y-2">
-          {arrivals.map((d) => (
-            <div
-              key={d.id}
-              className="rounded-xl border-l-4 border-[#B0716B] bg-[#F7ECEA] p-4 leading-relaxed text-[#4A3230]"
-            >
-              {d.text}
-            </div>
-          ))}
-        </div>
-      )}
+        {phase.kind === "chips" && (
+          <div className="mt-4 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4">
+            {phase.inactionText && (
+              <p className="mb-2 leading-relaxed text-[#4A3230]">{phase.inactionText}</p>
+            )}
+            {c.scoring === "standard" && (
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(phase.effects).map(([k, v]) =>
+                  v ? (
+                    <span
+                      key={k}
+                      className={`rounded-full px-3 py-1 text-xs font-medium ${
+                        v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
+                      }`}
+                    >
+                      {metricLabel(k)} {v > 0 ? `+${v}` : v}
+                    </span>
+                  ) : null
+                )}
+              </div>
+            )}
+            <p className="mt-2 text-xs italic text-[#7A6A5E]">
+              The shift keeps moving — full debrief when it ends.
+            </p>
+          </div>
+        )}
 
-      <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
-        <p className="leading-relaxed text-[#3A2B26]">{node.situation}</p>
-
-        {node.perspectives && node.perspectives.length > 0 && (
-          <div className="mt-4">
+        {patientChars.some((ch) => ch.bio) && !isTimed && (
+          <div className="mt-6 rounded-xl border border-[#E7D6C4] bg-white">
             <button
-              onClick={() => setShowPerspectives((v) => !v)}
-              className="rounded-full border border-[#4FA39C] px-4 py-1.5 text-sm font-medium text-[#2E6B66] transition-colors hover:bg-[#4FA39C] hover:text-white"
+              onClick={() => setShowAbout((v) => !v)}
+              className="w-full p-4 text-left text-sm font-medium text-[#8A5A44]"
             >
-              {showPerspectives ? "Hide" : "See"} what{" "}
-              {node.perspectives
-                .map((p) => characterById(c, p.characterId).name.split(" ")[0])
-                .join(" and ")}{" "}
-              {node.perspectives.length > 1 ? "are" : "is"} experiencing
+              About {patientChars.map((ch) => ch.name).join(" & ")} {showAbout ? "▴" : "▾"}
             </button>
-            {showPerspectives &&
-              node.perspectives.map((p) => (
-                <blockquote
-                  key={p.characterId}
-                  className="mt-3 rounded-xl border-l-4 border-[#4FA39C] bg-[#EDF6F5] p-4 text-[#2E4B48]"
-                >
-                  <p className="text-xs font-medium uppercase tracking-wide text-[#2E6B66]">
-                    {characterById(c, p.characterId).name}
-                  </p>
-                  <p className="mt-1">{p.text}</p>
-                </blockquote>
-              ))}
+            {showAbout &&
+              patientChars
+                .filter((ch) => ch.bio)
+                .map((ch) => (
+                  <div
+                    key={ch.id}
+                    className="border-t border-[#E7D6C4] p-4 text-sm leading-relaxed text-[#3A2B26]"
+                  >
+                    <p className="font-medium text-[#8A5A44]">{ch.name}</p>
+                    <p className="mt-1 italic text-[#5A4A40]">&ldquo;{ch.bio}&rdquo;</p>
+                    {ch.accessNeeds && (
+                      <p className="mt-2 text-[#5A4A40]">
+                        <span className="font-medium text-[#8A5A44]">Access needs: </span>
+                        {ch.accessNeeds.join(" · ")}
+                      </p>
+                    )}
+                  </div>
+                ))}
           </div>
         )}
       </div>
-
-      {phase.kind === "node" ? (
-        <div className="mt-4 space-y-3">
-          <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
-            What do you do?
-          </p>
-          {node.choices.map((choice) => (
-            <button
-              key={choice.id}
-              onClick={() => choose(choice)}
-              aria-label={choice.dialogue ? `Say: ${choice.label}` : choice.label}
-              className="block w-full rounded-xl border border-[#E7D6C4] bg-white p-4 text-left leading-snug text-[#3A2B26] transition-all hover:border-[#E88C6E] hover:bg-[#FDF6F0] hover:shadow-sm"
-            >
-              {choice.dialogue ? (
-                <span>
-                  <span className="mr-2 rounded bg-[#EDE4F0] px-1.5 py-0.5 text-xs font-medium text-[#6E5A7A]">
-                    say
-                  </span>
-                  &ldquo;{choice.label}&rdquo;
-                </span>
-              ) : (
-                choice.label
-              )}
-            </button>
-          ))}
-        </div>
-      ) : (
-        <FeedbackPanel
-          c={c}
-          choice={phase.choice}
-          showScores={c.scoring === "standard"}
-          onContinue={advance}
-        />
-      )}
-
-      {patientChars.some((ch) => ch.bio) && (
-        <div className="mt-6 rounded-xl border border-[#E7D6C4] bg-white">
-          <button
-            onClick={() => setShowAbout((v) => !v)}
-            className="w-full p-4 text-left text-sm font-medium text-[#8A5A44]"
-          >
-            About {patientChars.map((ch) => ch.name).join(" & ")} {showAbout ? "▴" : "▾"}
-          </button>
-          {showAbout &&
-            patientChars
-              .filter((ch) => ch.bio)
-              .map((ch) => (
-                <div
-                  key={ch.id}
-                  className="border-t border-[#E7D6C4] p-4 text-sm leading-relaxed text-[#3A2B26]"
-                >
-                  <p className="font-medium text-[#8A5A44]">{ch.name}</p>
-                  <p className="mt-1 italic text-[#5A4A40]">&ldquo;{ch.bio}&rdquo;</p>
-                  {ch.accessNeeds && (
-                    <p className="mt-2 text-[#5A4A40]">
-                      <span className="font-medium text-[#8A5A44]">Access needs: </span>
-                      {ch.accessNeeds.join(" · ")}
-                    </p>
-                  )}
-                </div>
-              ))}
-        </div>
-      )}
-    </div>
+    </>
   );
 }
 
 /* ------------------------------------------------------------------ */
 
 function FeedbackPanel({
-  c,
   choice,
   showScores,
   onContinue,
 }: {
-  c: ClinicalCase;
   choice: Choice;
   showScores: boolean;
   onContinue: () => void;
@@ -428,6 +762,7 @@ function FeedbackPanel({
 
 function Results({
   clinicalCase: c,
+  mode,
   metrics,
   path,
   clock,
@@ -436,6 +771,7 @@ function Results({
   onRestart,
 }: {
   clinicalCase: ClinicalCase;
+  mode: CaseMode;
   metrics: MetricState;
   path: PathStep[];
   clock: number;
@@ -444,6 +780,7 @@ function Results({
   onRestart: () => void;
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [openStep, setOpenStep] = useState<number | null>(null);
   const totals = stakeholderTotals(metrics);
   const RANGE = 8;
 
@@ -455,8 +792,12 @@ function Results({
     return firstMatch === r;
   });
 
-  const choiceById = (nodeId: string, choiceId: string) =>
-    nodeById(c, nodeId).choices.find((ch) => ch.id === choiceId);
+  const stepChoice = (step: PathStep): Choice | undefined =>
+    "choiceId" in step.resolution
+      ? nodeById(c, step.nodeId).choices.find(
+          (ch) => ch.id === (step.resolution as { choiceId: string }).choiceId
+        )
+      : undefined;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8">
@@ -534,20 +875,95 @@ function Results({
       )}
 
       <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
-        <h2 className="text-lg font-semibold text-[#3A2B26]">Your path</h2>
+        <h2 className="text-lg font-semibold text-[#3A2B26]">
+          {mode === "timed" ? "Your decisions, explained" : "Your path"}
+        </h2>
+        {mode === "timed" && (
+          <p className="mt-1 text-sm text-[#7A6A5E]">
+            You played under the clock, so the full debrief lives here. Open each
+            decision to see what it protected, what it risked, and how the
+            institution responded — including the ones the clock made for you.
+          </p>
+        )}
         <ol className="mt-3 space-y-2">
           {path.map((step, i) => {
             const n = nodeById(c, step.nodeId);
-            const ch =
-              "choiceId" in step.resolution
-                ? choiceById(step.nodeId, step.resolution.choiceId)
-                : undefined;
+            const ch = stepChoice(step);
+            const timedOut =
+              "choiceId" in step.resolution && step.resolution.timedOut;
+            const inaction = "inaction" in step.resolution;
+            const isOpen = openStep === i;
             return (
               <li key={i} className="text-sm leading-relaxed">
-                <span className="font-medium text-[#8A5A44]">{n.title}: </span>
-                <span className="text-[#3A2B26]">{ch?.label ?? "(no decision)"}</span>
-                {step.branchReason && (
-                  <span className="ml-1 italic text-[#7A6A5E]">— {step.branchReason}</span>
+                <button
+                  className="w-full text-left"
+                  onClick={() => setOpenStep(isOpen ? null : i)}
+                  disabled={mode !== "timed"}
+                >
+                  <span className="font-medium text-[#8A5A44]">{n.title}: </span>
+                  <span className="text-[#3A2B26]">
+                    {inaction ? "(no decision was made in time)" : ch?.label}
+                  </span>
+                  {timedOut && (
+                    <span className="ml-1 rounded bg-[#FBE3DA] px-1.5 py-0.5 text-xs font-medium text-[#A34A2E]">
+                      decided by the clock
+                    </span>
+                  )}
+                  {step.branchReason && (
+                    <span className="ml-1 italic text-[#7A6A5E]">— {step.branchReason}</span>
+                  )}
+                  {mode === "timed" && (
+                    <span className="ml-1 text-[#8A5A44]">{isOpen ? "▴" : "▾"}</span>
+                  )}
+                </button>
+                {isOpen && mode === "timed" && (
+                  <div className="mt-2 space-y-2 rounded-xl bg-[#FBF3E9] p-3">
+                    {inaction && n.inactionOutcome ? (
+                      <>
+                        <p className="text-[#3A2B26]">{n.inactionOutcome.text}</p>
+                        <p className="text-[#3A2B26]">
+                          <span className="font-medium text-[#8A5A44]">Ethically: </span>
+                          {n.inactionOutcome.feedback.ethical}
+                        </p>
+                      </>
+                    ) : ch ? (
+                      <>
+                        <p className="text-[#3A2B26]">
+                          <span className="font-medium text-[#8A5A44]">What happened: </span>
+                          {ch.feedback.immediate}
+                        </p>
+                        {ch.feedback.institutional && (
+                          <p className="text-[#3A2B26]">
+                            <span className="font-medium text-[#6E5A7A]">The institution: </span>
+                            {ch.feedback.institutional}
+                          </p>
+                        )}
+                        <p className="text-[#3A2B26]">
+                          <span className="font-medium text-[#8A5A44]">
+                            Protected and risked:{" "}
+                          </span>
+                          {ch.feedback.ethical}
+                        </p>
+                      </>
+                    ) : null}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {Object.entries(step.effectsApplied).map(([k, v]) =>
+                        v ? (
+                          <span
+                            key={k}
+                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
+                            }`}
+                          >
+                            {metricLabel(k)} {v > 0 ? `+${v}` : v}
+                          </span>
+                        ) : null
+                      )}
+                      <span className="rounded-full bg-white px-2.5 py-0.5 text-xs text-[#7A6A5E]">
+                        decided in {(step.decisionMs / 1000).toFixed(1)}s
+                      </span>
+                    </div>
+                  </div>
                 )}
               </li>
             );
