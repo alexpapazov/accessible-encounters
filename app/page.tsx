@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { cases } from "@/lib/data/cases";
-import { getPersona } from "@/lib/data/personas";
 
 export default function Home() {
   return (
@@ -16,7 +15,7 @@ export default function Home() {
 
       <section className="mt-8 space-y-4">
         {cases.map((c) => {
-          const persona = getPersona(c.personaId);
+          const patients = c.characters.filter((ch) => ch.role === "patient");
           return (
             <Link
               key={c.id}
@@ -41,12 +40,19 @@ export default function Home() {
                   >
                     {c.reviewStatus === "expert-reviewed"
                       ? "expert reviewed"
-                      : "draft — awaiting Deaf/ASL expert review"}
+                      : "draft — awaiting expert review"}
                   </span>
                 </div>
               </div>
               <p className="mt-3 text-sm leading-relaxed text-[#3A2B26]">
-                <span className="font-medium">{persona.name}</span>, {persona.age} — {persona.language}
+                <span className="font-medium">
+                  {patients.map((p) => p.name).join(" · ")}
+                </span>
+                {c.modes.includes("timed") && (
+                  <span className="ml-2 rounded bg-[#FBE3DA] px-1.5 py-0.5 text-xs font-medium text-[#A34A2E]">
+                    time-constrained
+                  </span>
+                )}
               </p>
             </Link>
           );

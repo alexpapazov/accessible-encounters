@@ -38,6 +38,31 @@ patients — exploring the diversity of deafness, access needs, and deafness as 
 5. **Four score dimensions, never one number.** A clinician can "succeed" clinically
    while trampling autonomy — the model must be able to say so.
 
+## Node-text authoring protocol (user-approved 2026-07-24)
+
+New scenarios test *values under constraint*, not knowledge. Four rules per node:
+
+1. **Pareto rule.** No choice may dominate another: for every pair of options, each
+   must beat the other on at least one metric. If one option wins on everything, the
+   node is broken — fix the structure before writing prose.
+2. **Every option is somebody's right answer.** Each choice must be the defensible
+   pick from some lens (patient-advocate, triage-realist, policy-follower...).
+   Authoring test: write one sentence per option starting "A thoughtful clinician
+   would choose this because…". If you can't, cut or rewrite the option.
+3. **Name the cost in the prose.** The situation text must make competing obligations
+   *felt* before the choice — the visible waiting room, the supervisor's comment,
+   your own fatigue — in ≤120 words. Concise pressure beats exposition.
+4. **Tempting corrosion.** The efficient-but-corrosive option must be genuinely
+   attractive (saves time, looks competent, follows policy) — never strawmanned.
+   Moral injury only teaches if the injurious path was the one you almost wanted.
+
+## Review exports
+
+`npm run export:review` regenerates `review/<case-id>.md` — the complete text of
+every case as a linear, readable script (all nodes, choices, effects, feedback).
+Re-run it after any case edit; these files are how the author and outside experts
+review case content without clicking through the app.
+
 ## Roadmap context
 
 Phase 0/1 (current): routine clinic visit case with Maya. Planned next: ER consent
