@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/AuthProvider";
 import { listAttempts, type AttemptRow } from "@/lib/attempts";
+import { analyzeAttempts } from "@/lib/patterns";
 import { cases } from "@/lib/data/cases";
 import { METRICS, STAKEHOLDERS, metricsFor, type MetricState } from "@/lib/types";
 import { stakeholderTotals } from "@/lib/engine";
@@ -18,6 +19,14 @@ export default function DashboardPage() {
   useEffect(() => {
     if (user) listAttempts(user.id).then(setAttempts);
   }, [user]);
+
+  const analysis = useMemo(
+    () =>
+      attempts
+        ? analyzeAttempts(attempts, (id) => caseById(id)?.title ?? id)
+        : null,
+    [attempts]
+  );
 
   if (!enabled) {
     return (
@@ -66,6 +75,47 @@ export default function DashboardPage() {
         <Stat label="Total attempts" value={completedAttempts.length} />
         <Stat label="In progress" value={inProgress.length} />
       </div>
+
+      {analysis && analysis.attemptCount > 0 && (
+        <section className="mt-6 rounded-2xl border border-[#E7D6C4] bg-white p-5">
+          <div className="flex flex-wrap items-baseline justify-between gap-3">
+            <h2 className="text-lg font-semibold text-[#3A2B26]">Your tendencies</h2>
+            <Link
+              href="/dashboard/patterns"
+              className="text-sm font-medium text-[#8A5A44] hover:underline"
+            >
+              Full patterns and progress →
+            </Link>
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            {STAKEHOLDERS.map((s) => {
+              const v = Math.round(analysis.stakeholderAverages[s.key] * 10) / 10;
+              return (
+                <div key={s.key} className="rounded-lg bg-[#FBF3E9] px-3 py-2">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xs font-medium tracking-wide text-[#8A5A44]">
+                      {s.label}
+                    </span>
+                    <span
+                      className={`text-sm font-semibold ${
+                        v > 0 ? "text-[#2E6B66]" : v < 0 ? "text-[#A34A2E]" : "text-[#7A6A5E]"
+                      }`}
+                    >
+                      {v > 0 ? "+" : ""}
+                      {v}
+                    </span>
+                  </div>
+                  <MiniBar value={v} />
+                </div>
+              );
+            })}
+          </div>
+          {analysis.statements[0] && (
+            <p className="mt-3 leading-relaxed text-[#3A2B26]">{analysis.statements[0]}</p>
+          )}
+          <p className="mt-1 text-xs text-[#7A6A5E]">Average per completed encounter.</p>
+        </section>
+      )}
 
       {inProgress.length > 0 && (
         <section className="mt-8">
