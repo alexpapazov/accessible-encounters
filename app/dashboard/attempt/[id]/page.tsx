@@ -8,6 +8,7 @@ import { getAttempt, listCaseAttempts, type AttemptRow } from "@/lib/attempts";
 import { cases } from "@/lib/data/cases";
 import Scene from "@/components/Scene";
 import DecisionMap from "@/components/DecisionMap";
+import ReflectionComposer from "@/components/ReflectionComposer";
 import type {
   Choice,
   ClinicalCase,
@@ -148,7 +149,10 @@ export default function AttemptReviewPage() {
         </p>
       )}
 
-      <div className="mt-4 flex items-center justify-between gap-3">
+      <nav
+        aria-label="Decisions in this attempt"
+        className="mt-4 flex flex-wrap items-center justify-between gap-3"
+      >
         <button
           onClick={() => goto(stepIndex - 1)}
           disabled={stepIndex === 0}
@@ -156,7 +160,7 @@ export default function AttemptReviewPage() {
         >
           ← Previous
         </button>
-        <div className="flex flex-1 justify-center gap-1.5">
+        <div className="order-last flex w-full justify-center gap-1.5 sm:order-none sm:w-auto sm:flex-1">
           {path.map((_, i) => (
             <button
               key={i}
@@ -182,7 +186,7 @@ export default function AttemptReviewPage() {
         >
           Next →
         </button>
-      </div>
+      </nav>
 
       {onSummary ? (
         <Summary attempt={attempt} parent={parent} c={c} />
@@ -537,6 +541,12 @@ function Summary({
           </div>
         </div>
       )}
+      <ReflectionComposer
+        attemptId={attempt.id}
+        initial={attempt.reflections}
+        prompt="Looking back at this attempt: what stayed with you, and what would you defend if someone asked?"
+      />
+
       <div className="flex gap-3">
         <Link
           href={`/case/${c.id}`}

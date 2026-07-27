@@ -187,6 +187,20 @@ export default function PatternsPage() {
         </section>
       )}
 
+      {analysis.prompts.length > 0 && (
+        <section className="mt-4 rounded-2xl border-l-4 border-[#4FA39C] bg-[#EDF6F5] p-5">
+          <h2 className="text-lg font-semibold text-[#2E4B48]">To sit with</h2>
+          <p className="mt-1 text-sm text-[#2E6B66]">
+            Drawn from what you have actually done across these encounters.
+          </p>
+          <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-[#2E4B48]">
+            {analysis.prompts.map((p, i) => (
+              <li key={i}>{p}</li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {analysis.trends.length > 0 && (
         <section className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#3A2B26]">Across repeated attempts</h2>

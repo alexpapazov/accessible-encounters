@@ -25,10 +25,22 @@ export interface AttemptRow {
   state: SavedRunState | null;
   final_metrics: MetricState | null;
   outcome_summary: string | null;
+  reflections: string | null;
   parent_attempt_id: string | null;
   branch_node_id: string | null;
   started_at: string;
   completed_at: string | null;
+}
+
+/** The learner's own written reflection on an attempt (optional, editable). */
+export async function saveReflection(attemptId: string, text: string) {
+  const supabase = getSupabase();
+  if (!supabase) return;
+  const { error } = await supabase
+    .from("attempts")
+    .update({ reflections: text.trim() || null })
+    .eq("id", attemptId);
+  if (error) console.error("saveReflection failed:", error.message);
 }
 
 export async function createAttempt(

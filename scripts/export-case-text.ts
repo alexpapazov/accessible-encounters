@@ -55,6 +55,22 @@ function exportCase(c: ClinicalCase): string {
 
   push(`# ${c.title}`);
   push();
+  push(`> **For reviewers.** This is the complete text of one case, in reading`);
+  push(`> order. You do not need to use the app. Questions worth answering as you read:`);
+  push(`>`);
+  push(`> 1. **Does any choice read as obviously correct?** Every option should be`);
+  push(`>    defensible from some stakeholder's position. Flag any that isn't.`);
+  push(`> 2. **Are the patients people, or teaching devices?** Flag anything that`);
+  push(`>    reduces a character to their diagnosis, identity, or a lesson.`);
+  push(`> 3. **Is the clinical content accurate and current?**`);
+  push(`> 4. **Does the feedback explain rather than grade?** Flag anything that`);
+  push(`>    reads as "right answer / wrong answer."`);
+  push(`> 5. **Whose experience is missing or misrepresented?**`);
+  push(`>`);
+  push(`> Send notes back in any form. Review status only changes to`);
+  push(`> \`expert-reviewed\` after a named reviewer with relevant lived or`);
+  push(`> professional expertise has actually read the case.`);
+  push();
   push(`- **Case id:** \`${c.id}\` (v${c.caseVersion})`);
   push(`- **Setting:** ${c.setting}`);
   push(`- **Difficulty:** ${c.difficulty} · **Modes:** ${c.modes.join(", ")} · **Scoring:** ${c.scoring}`);
@@ -210,3 +226,31 @@ for (const c of cases) {
   writeFileSync(file, exportCase(c));
   console.log(`Exported ${c.nodes.length} nodes → review/${c.id}.md`);
 }
+
+/* An index so the folder can be handed to a reviewer as-is. */
+const index: string[] = [
+  "# Accessible Clinical Encounters — case review packet",
+  "",
+  "Each file below is the complete text of one clinical case: every situation,",
+  "every choice, every consequence, in reading order. Reviewer guidance is at",
+  "the top of each file.",
+  "",
+  "| Case | Status | Nodes | Modes | Scoring |",
+  "| --- | --- | ---: | --- | --- |",
+  ...cases.map(
+    (c) =>
+      `| [${c.title}](./${c.id}.md) | ${c.reviewStatus} | ${c.nodes.length} | ${c.modes.join(", ")} | ${c.scoring} |`
+  ),
+  "",
+  "## What review changes",
+  "",
+  "A case stays marked `draft` in the live app until a named reviewer with",
+  "relevant lived or professional expertise has read it. The badge on each case",
+  "in the app reports this honestly — it is not a formality, and it is not",
+  "flipped to `expert-reviewed` on the author's own say-so.",
+  "",
+  "Regenerate this packet after any case edit: `npm run export:review`",
+  "",
+];
+writeFileSync(join(outDir, "INDEX.md"), index.join("\n"));
+console.log("Wrote review/INDEX.md");

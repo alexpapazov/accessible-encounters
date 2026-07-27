@@ -58,10 +58,21 @@ New scenarios test *values under constraint*, not knowledge. Four rules per node
 
 ## Review exports
 
-`npm run export:review` regenerates `review/<case-id>.md` — the complete text of
-every case as a linear, readable script (all nodes, choices, effects, feedback).
-Re-run it after any case edit; these files are how the author and outside experts
-review case content without clicking through the app.
+`npm run export:review` regenerates the reviewer packet in `review/`: `INDEX.md`
+(all cases, status, size) plus `<case-id>.md` for each case — the complete text
+as a linear script, with reviewer guidance at the top of every file. Re-run
+after any case edit.
+
+**Review status is not a formality.** A case ships as `draft` and the app says
+so on its card. It becomes `expert-reviewed` only after a named reviewer with
+relevant lived or professional expertise has actually read the packet and sent
+notes. Never flip `reviewStatus` on the author's own judgment.
+
+## Reflections
+
+Learners can save a private written reflection with any attempt (results screen
+and attempt review both write `attempts.reflections`). Never scored, never
+analyzed, never surfaced anywhere but that learner's own history.
 
 ## Roadmap context
 

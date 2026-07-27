@@ -42,6 +42,8 @@ export interface PatternAnalysis {
   statements: string[];
   modeComparisons: ModeComparison[];
   trends: CaseTrend[];
+  /** Reflection prompts generated from what this learner has actually done. */
+  prompts: string[];
 }
 
 const emptyMetricAverages = (): Record<MetricKey, number> =>
@@ -73,7 +75,83 @@ export function analyzeAttempts(
     statements: buildStatements(done.length, stakeholderAverages, metricAverages),
     modeComparisons: buildModeComparisons(done, caseTitle),
     trends: buildTrends(done, caseTitle),
+    prompts: buildPrompts(done, attempts, metricAverages, stakeholderAverages, caseTitle),
   };
+}
+
+/* ------------------------------------------------------------------ */
+
+/**
+ * Prompts grounded in this learner's own record — repeated choices, decisions
+ * the clock made, paths never revisited. Questions only: the app asks, it
+ * never concludes.
+ */
+function buildPrompts(
+  done: (AttemptRow & { final_metrics: MetricState })[],
+  all: AttemptRow[],
+  metrics: Record<MetricKey, number>,
+  stake: Record<Stakeholder, number>,
+  caseTitle: (caseId: string) => string
+): string[] {
+  if (!done.length) return [];
+  const out: string[] = [];
+
+  // A choice taken every single time a case was played.
+  const byCase = new Map<string, typeof done>();
+  for (const a of done) byCase.set(a.case_id, [...(byCase.get(a.case_id) ?? []), a]);
+  for (const [caseId, list] of byCase) {
+    if (list.length < 2) continue;
+    const counts = new Map<string, number>();
+    for (const a of list)
+      for (const s of a.path)
+        if ("choiceId" in s.resolution)
+          counts.set(s.resolution.choiceId, (counts.get(s.resolution.choiceId) ?? 0) + 1);
+    const alwaysTaken = [...counts.entries()].filter(([, n]) => n === list.length);
+    if (alwaysTaken.length) {
+      out.push(
+        `You made the same decision at ${alwaysTaken.length === 1 ? "one point" : `${alwaysTaken.length} points`} in every attempt at “${caseTitle(caseId)}”. What would have to be true about the shift — or about you — for that to change?`
+      );
+      break;
+    }
+  }
+
+  // Decisions the clock made.
+  const timedOut = done.reduce(
+    (n, a) =>
+      n + a.path.filter((s) => "choiceId" in s.resolution && s.resolution.timedOut).length,
+    0
+  );
+  const inaction = done.reduce(
+    (n, a) => n + a.path.filter((s) => "inaction" in s.resolution).length,
+    0
+  );
+  if (timedOut + inaction > 0)
+    out.push(
+      `${timedOut + inaction} of your decisions were made by the clock rather than by you. Pick one: what were you actually doing in those seconds — weighing something, or avoiding it?`
+    );
+
+  // Never explored a counterfactual.
+  if (done.length >= 2 && !all.some((a) => a.parent_attempt_id))
+    out.push(
+      "You have replayed cases but never branched from a single decision. Which moment still bothers you enough to go back and take differently?"
+    );
+
+  // The institution-first / patient-first tension, asked as a question.
+  if (stake.institution > 0.5 && stake.patient < 0)
+    out.push(
+      "Your record is strongest where the institution keeps score. Which of your decisions would you defend to the patient, rather than to a supervisor?"
+    );
+  else if (stake.patient > 0.5 && stake.doctor < 0)
+    out.push(
+      "You have repeatedly spent your own integrity or stamina to protect patients. How many shifts can that be sustained — and what happens to your patients when it can't?"
+    );
+
+  if (metrics.professionalIntegrity < -0.5)
+    out.push(
+      "Name the single choice you would most want back. Was it a decision you made, or one the conditions made for you? What would have had to be different upstream?"
+    );
+
+  return out.slice(0, 4);
 }
 
 /* ------------------------------------------------------------------ */

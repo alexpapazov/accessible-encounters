@@ -32,8 +32,11 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#FBF5EE]">
         <AuthProvider>
+          <a href="#main" className="skip-link">
+            Skip to content
+          </a>
           <SiteHeader />
-          {children}
+          <main id="main">{children}</main>
         </AuthProvider>
       </body>
     </html>

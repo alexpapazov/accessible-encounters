@@ -37,6 +37,7 @@ import {
 } from "@/lib/engine";
 import type { EvalContext } from "@/lib/engine";
 import Scene from "./Scene";
+import ReflectionComposer from "./ReflectionComposer";
 
 function evalConditionSafe(cond: Condition, ctx: EvalContext): boolean {
   try {
@@ -83,6 +84,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     parentDate: string;
   } | null>(null);
   const [timerFraction, setTimerFraction] = useState<number | null>(null);
+  const [timeAnnouncement, setTimeAnnouncement] = useState("");
   const [liveHesMin, setLiveHesMin] = useState(0);
   const nodeShownAt = useRef<number>(Date.now());
   const attemptId = useRef<string | null>(null);
@@ -341,6 +343,14 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
       const elapsed = sinceShown - GRACE_MS;
       const fraction = Math.max(0, 1 - Math.max(0, elapsed) / total);
       setTimerFraction(fraction);
+      // Coarse spoken equivalent of the bar, at thresholds only.
+      const left = Math.ceil((total - Math.max(0, elapsed)) / 1000);
+      setTimeAnnouncement((prev) => {
+        if (left <= 5 && !prev.startsWith("5")) return "5 seconds left to decide";
+        if (left <= 15 && left > 5 && !prev.startsWith("15")) return "15 seconds left to decide";
+        if (left <= 30 && left > 15 && !prev.startsWith("30")) return "30 seconds left to decide";
+        return prev;
+      });
       if (hesRate) setLiveHesMin(Math.floor(sinceShown / 1000 / hesRate));
       if (fraction <= 0 && !firedTimeout.current) {
         firedTimeout.current = true;
@@ -493,6 +503,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         clock={clock}
         outcomeSummary={node.outcomeSummary}
         aftermath={arrivals}
+        attemptId={attemptId.current}
         onRestart={restart}
       />
     );
@@ -518,7 +529,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   return (
     <>
       {timerActive && timerFraction !== null && (
-        <div className="fixed inset-x-0 top-0 z-50 h-2.5 bg-[#F3E8DA]">
+        <div className="fixed inset-x-0 top-0 z-50 h-2.5 bg-[#F3E8DA]" aria-hidden="true">
           <div
             className="h-full transition-[width] duration-100 ease-linear"
             style={{
@@ -529,6 +540,10 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           />
         </div>
       )}
+      {/* Spoken equivalent of the countdown bar. */}
+      <div className="sr-only" role="status" aria-live="assertive">
+        {timerActive ? timeAnnouncement : ""}
+      </div>
 
       <div className="mx-auto max-w-3xl px-4 py-8">
         <header className="mb-4 flex items-baseline justify-between gap-4">
@@ -695,7 +710,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         )}
 
         {phase.kind === "chips" && (
-          <div className="mt-4 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4">
+          <div
+            className="mt-4 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4"
+            role="status"
+            aria-live="polite"
+          >
             {phase.inactionText && (
               <p className="mb-2 leading-relaxed text-[#4A3230]">{phase.inactionText}</p>
             )}
@@ -839,6 +858,7 @@ function Results({
   clock,
   outcomeSummary,
   aftermath,
+  attemptId,
   onRestart,
 }: {
   clinicalCase: ClinicalCase;
@@ -848,6 +868,7 @@ function Results({
   clock: number;
   outcomeSummary?: string;
   aftermath: DelayedOutcome[];
+  attemptId: string | null;
   onRestart: () => void;
 }) {
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -1076,6 +1097,8 @@ function Results({
           ))}
         </ul>
       </div>
+
+      <ReflectionComposer attemptId={attemptId} />
 
       {c.readingConnections.length > 0 && (
         <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-5">

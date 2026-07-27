@@ -1,5 +1,21 @@
 # A routine visit, an unroutine gap
 
+> **For reviewers.** This is the complete text of one case, in reading
+> order. You do not need to use the app. Questions worth answering as you read:
+>
+> 1. **Does any choice read as obviously correct?** Every option should be
+>    defensible from some stakeholder's position. Flag any that isn't.
+> 2. **Are the patients people, or teaching devices?** Flag anything that
+>    reduces a character to their diagnosis, identity, or a lesson.
+> 3. **Is the clinical content accurate and current?**
+> 4. **Does the feedback explain rather than grade?** Flag anything that
+>    reads as "right answer / wrong answer."
+> 5. **Whose experience is missing or misrepresented?**
+>
+> Send notes back in any form. Review status only changes to
+> `expert-reviewed` after a named reviewer with relevant lived or
+> professional expertise has actually read the case.
+
 - **Case id:** `routine-clinic-visit` (v2)
 - **Setting:** Primary care clinic — headache follow-up appointment
 - **Difficulty:** foundational · **Modes:** deliberative · **Scoring:** standard
