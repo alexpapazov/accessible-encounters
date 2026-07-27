@@ -241,25 +241,42 @@ function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Moo
       {/* frame + mattress */}
       <rect x="-62" y="262" width="124" height="10" rx="3" fill="#B8B2A8" />
       <rect x="-62" y="248" width="124" height="15" rx="7" fill="#F2EEE7" />
-      {/* raised backrest with pillow, patient reclining against it */}
-      <g transform="rotate(-28 -38 252)">
-        <rect x="-54" y="196" width="32" height="58" rx="8" fill="#F2EEE7" />
-        <rect x="-51" y="200" width="26" height="18" rx="8" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
-        <rect x="-50" y="216" width="24" height="38" rx="9" fill="#D8E4E8" />
-        <circle cx="-38" cy="188" r="13" fill={skin} />
-        <path
-          d="M-50 186 Q-51 175 -38 174 Q-25 175 -26 186 L-26 181 Q-26 177 -38 177 Q-50 177 -50 181 Z"
-          fill={hair}
-        />
-        <g transform="scale(0.85) translate(-6.7 33.2)">
-          <Face hx={-38} hy={190} mood={mood} skin={skin} />
-        </g>
+      {/* angled backrest + pillow BEHIND the patient */}
+      <g transform="rotate(-22 -34 252)">
+        <rect x="-50" y="192" width="22" height="62" rx="8" fill="#F2EEE7" />
+        <rect x="-52" y="194" width="20" height="26" rx="9" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
       </g>
-      {/* blanket over torso and legs, with knee mound and foot bump */}
-      <ellipse cx="20" cy="240" rx="15" ry="7" fill="#BFD3DC" />
-      <rect x="-22" y="238" width="82" height="15" rx="7" fill="#BFD3DC" />
-      <ellipse cx="52" cy="242" rx="8" ry="5" fill="#BFD3DC" />
-      <line x1="-18" y1="249" x2="56" y2="249" stroke="#A8BEC8" strokeWidth="1.5" />
+      {/* patient sitting up: upright torso and head, fully frontal */}
+      <rect x="-46" y="212" width="26" height="40" rx="10" fill="#D8E4E8" />
+      <rect x="-38" y="204" width="10" height="12" rx="4" fill={skin} />
+      <circle cx="-33" cy="194" r="13" fill={skin} />
+      {/* hair: top arc plus side panels framing the face to the jaw */}
+      <path
+        d="M-46 194 Q-47 180 -33 179 Q-19 180 -20 194 L-20 187 Q-20 183 -33 183 Q-46 183 -46 187 Z"
+        fill={hair}
+      />
+      <path d="M-46 191 Q-48 202 -44 209 L-42 196 Z" fill={hair} />
+      <path d="M-20 191 Q-18 202 -22 209 L-24 196 Z" fill={hair} />
+      <g transform="scale(0.85) translate(-5.8 28.7)">
+        <Face hx={-33} hy={196} mood={mood} skin={skin} />
+      </g>
+      {/* blanket over the lap, with knee mound and foot bump */}
+      <ellipse cx="18" cy="238" rx="15" ry="7" fill="#BFD3DC" />
+      <rect x="-30" y="236" width="90" height="17" rx="8" fill="#BFD3DC" />
+      <ellipse cx="52" cy="240" rx="8" ry="5" fill="#BFD3DC" />
+      <line x1="-26" y1="248" x2="56" y2="248" stroke="#A8BEC8" strokeWidth="1.5" />
+      {/* arm resting on the blanket, outlined so it reads against the covers */}
+      <rect
+        x="-42"
+        y="230"
+        width="34"
+        height="10"
+        rx="5"
+        fill="#D8E4E8"
+        stroke="#9AB2BE"
+        strokeWidth="1.5"
+      />
+      <circle cx="-4" cy="235" r="5" fill={skin} stroke="#C79B72" strokeWidth="1" />
     </g>
   );
 }

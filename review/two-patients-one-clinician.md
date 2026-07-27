@@ -566,7 +566,7 @@ Marcus is in bay seven — calmer, watchful, present. There is no psychiatrist u
 
 *Effects: Professional integrity +2, Quality of care +1, Risk and compliance -1, Personal sustainability -1*
 
-*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 → `ending-both-held`; if NOT (visited `removal-unfolds`) → `ending-swap-cost`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 AND Agency and dignity ≥ 2 AND Trust and therapeutic relationship ≥ 1 → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** You write what happened, in order, with times. It reads, as true things about tonight do, like an accusation — because an accurate record of an impossible night accuses the people who scheduled it.
 
@@ -582,7 +582,7 @@ Marcus is in bay seven — calmer, watchful, present. There is no psychiatrist u
 
 *Effects: Risk and compliance +2, Operational efficiency +1, Professional integrity -2*
 
-*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 → `ending-both-held`; if NOT (visited `removal-unfolds`) → `ending-swap-cost`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 AND Agency and dignity ≥ 2 AND Trust and therapeutic relationship ≥ 1 → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** The sentences assemble themselves; you've read a thousand of them and now you know why they all sound alike. Save. Sign. Tonight officially went fine.
 
@@ -596,7 +596,7 @@ Marcus is in bay seven — calmer, watchful, present. There is no psychiatrist u
 
 *Effects: Trust and therapeutic relationship +1, Personal sustainability -1, Quality of care -1, Risk and compliance -1*
 
-*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 → `ending-both-held`; if NOT (visited `removal-unfolds`) → `ending-swap-cost`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if NOT (visited `removal-unfolds`) AND clock < T+55 AND Agency and dignity ≥ 2 AND Trust and therapeutic relationship ≥ 1 → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** Eleanor is asleep; her pressure is boring, which is beautiful. The charts are still open at 7 a.m., when the day team arrives and your documentation gets done in the eleven worst minutes of your cognitive week.
 

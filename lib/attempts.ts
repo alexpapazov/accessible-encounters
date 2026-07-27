@@ -25,6 +25,8 @@ export interface AttemptRow {
   state: SavedRunState | null;
   final_metrics: MetricState | null;
   outcome_summary: string | null;
+  parent_attempt_id: string | null;
+  branch_node_id: string | null;
   started_at: string;
   completed_at: string | null;
 }
@@ -33,13 +35,21 @@ export async function createAttempt(
   userId: string,
   caseId: string,
   caseVersion: number,
-  mode: CaseMode
+  mode: CaseMode,
+  branch?: { parentAttemptId: string; branchNodeId: string }
 ): Promise<string | null> {
   const supabase = getSupabase();
   if (!supabase) return null;
   const { data, error } = await supabase
     .from("attempts")
-    .insert({ user_id: userId, case_id: caseId, case_version: caseVersion, mode })
+    .insert({
+      user_id: userId,
+      case_id: caseId,
+      case_version: caseVersion,
+      mode,
+      parent_attempt_id: branch?.parentAttemptId ?? null,
+      branch_node_id: branch?.branchNodeId ?? null,
+    })
     .select("id")
     .single();
   if (error) {
@@ -47,6 +57,23 @@ export async function createAttempt(
     return null;
   }
   return data.id;
+}
+
+/** Every completed attempt at one case — powers the Explored Paths map. */
+export async function listCaseAttempts(
+  userId: string,
+  caseId: string
+): Promise<AttemptRow[]> {
+  const supabase = getSupabase();
+  if (!supabase) return [];
+  const { data } = await supabase
+    .from("attempts")
+    .select("*")
+    .eq("user_id", userId)
+    .eq("case_id", caseId)
+    .eq("status", "completed")
+    .order("started_at", { ascending: true });
+  return (data as AttemptRow[]) ?? [];
 }
 
 export async function saveProgress(attemptId: string, state: SavedRunState) {

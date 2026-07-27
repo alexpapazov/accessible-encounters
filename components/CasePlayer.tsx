@@ -7,6 +7,7 @@ import {
   abandonAttempt,
   completeAttempt,
   createAttempt,
+  getAttempt,
   latestInProgress,
   saveProgress,
   type AttemptRow,
@@ -30,6 +31,7 @@ import {
   dueDelayed,
   evalCondition,
   nodeById,
+  replayPrefix,
   resolveNext,
   stakeholderTotals,
 } from "@/lib/engine";
@@ -75,6 +77,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   const [showPerspectives, setShowPerspectives] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [resumeOffer, setResumeOffer] = useState<AttemptRow | null>(null);
+  const [branch, setBranch] = useState<{
+    parentId: string;
+    stepIndex: number;
+    parentDate: string;
+  } | null>(null);
   const [timerFraction, setTimerFraction] = useState<number | null>(null);
   const [liveHesMin, setLiveHesMin] = useState(0);
   const nodeShownAt = useRef<number>(Date.now());
@@ -97,8 +104,39 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   /* Persistence                                                   */
   /* ------------------------------------------------------------ */
 
+  /* Counterfactual entry: /case/x?branchFrom=<attemptId>&atStep=<index> */
   useEffect(() => {
     if (!user) return;
+    const params = new URLSearchParams(window.location.search);
+    const parentId = params.get("branchFrom");
+    const atStep = Number(params.get("atStep"));
+    if (!parentId || Number.isNaN(atStep)) return;
+
+    getAttempt(parentId).then((parent) => {
+      if (!parent || parent.case_id !== c.id || !parent.path[atStep]) return;
+      const prefix = replayPrefix(c, parent.path, atStep);
+      setMode(parent.mode);
+      setNodeId(prefix.nodeId);
+      setMetrics(prefix.metrics);
+      setClock(prefix.clock);
+      setPath(prefix.path);
+      setQueue(prefix.queue);
+      setPhase({ kind: "node" });
+      setResumeOffer(null);
+      setBranch({
+        parentId,
+        stepIndex: atStep,
+        parentDate: new Date(
+          parent.completed_at ?? parent.started_at
+        ).toLocaleDateString(),
+      });
+      nodeShownAt.current = Date.now();
+    });
+  }, [user, c]);
+
+  useEffect(() => {
+    if (!user || branch) return;
+    if (new URLSearchParams(window.location.search).has("branchFrom")) return;
     latestInProgress(user.id, c.id).then((row) => {
       if (!row) return;
       const staleVersion = row.case_version !== c.caseVersion;
@@ -106,7 +144,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
       if (staleVersion || timedNoResume || !row.state) abandonAttempt(row.id);
       else setResumeOffer(row);
     });
-  }, [user, c.id, c.caseVersion, c.timing?.leavingEndsAttempt]);
+  }, [user, branch, c.id, c.caseVersion, c.timing?.leavingEndsAttempt]);
 
   useEffect(() => {
     if (!attemptId.current || completed.current) return;
@@ -125,8 +163,14 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   /* ------------------------------------------------------------ */
 
   const choose = (choice: Choice, opts: { timedOut?: boolean } = {}) => {
-    if (user && !attemptId.current && path.length === 0 && mode) {
-      createAttempt(user.id, c.id, c.caseVersion, mode).then((id) => {
+    if (user && !attemptId.current && mode && (path.length === 0 || branch)) {
+      createAttempt(
+        user.id,
+        c.id,
+        c.caseVersion,
+        mode,
+        branch ? { parentAttemptId: branch.parentId, branchNodeId: node.id } : undefined
+      ).then((id) => {
         attemptId.current = id;
       });
       if (resumeOffer) {
@@ -249,6 +293,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     attemptId.current = null;
     completed.current = false;
     firedTimeout.current = false;
+    setBranch(null);
     setMode(c.modes.length === 1 ? c.modes[0] : null);
     setNodeId(c.startNodeId);
     setMetrics(initialMetrics());
@@ -333,6 +378,18 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         >
           Sign in to begin
         </Link>
+      </div>
+    );
+  }
+
+  if (
+    mode === null &&
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("branchFrom")
+  ) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-16 text-center text-[#7A6A5E]">
+        Rebuilding your earlier decisions…
       </div>
     );
   }
@@ -501,6 +558,20 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
             )}
           </div>
         </header>
+
+        {branch && (
+          <div className="mb-4 rounded-xl border border-[#6E5A7A] bg-[#EDE4F0] p-4">
+            <p className="text-sm font-medium uppercase tracking-wide text-[#6E5A7A]">
+              Counterfactual
+            </p>
+            <p className="mt-1 text-sm leading-relaxed text-[#4A3D52]">
+              Your first {branch.stepIndex} decision
+              {branch.stepIndex === 1 ? "" : "s"} from the {branch.parentDate}{" "}
+              attempt are preserved. From here, choose differently and see where
+              it leads — this saves as a linked counterfactual.
+            </p>
+          </div>
+        )}
 
         {resumeOffer && path.length === 0 && (
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#4FA39C] bg-[#EDF6F5] p-4">

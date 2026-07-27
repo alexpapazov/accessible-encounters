@@ -1431,15 +1431,29 @@ export const twoPatientsOneClinician: ClinicalCase = {
                 all: [
                   { not: { visited: "removal-unfolds" } },
                   { clockBelow: 55 },
+                  { metricAtLeast: ["agencyDignity", 2] },
+                  { metricAtLeast: ["trustRelationship", 1] },
                 ],
               },
               nodeId: "ending-both-held",
-              reason: "Both patients were attended, and Eleanor's care ran on time",
+              reason:
+                "Nobody was removed, Eleanor's care ran on time, and both patients kept their standing with you",
+            },
+            {
+              when: {
+                all: [
+                  { not: { visited: "removal-unfolds" } },
+                  { clockAtLeast: 55 },
+                ],
+              },
+              nodeId: "ending-swap-cost",
+              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
             },
             {
               when: { not: { visited: "removal-unfolds" } },
-              nodeId: "ending-swap-cost",
-              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
+              nodeId: "ending-frayed",
+              reason:
+                "Both patients stayed in the department, but dignity and trust were spent to keep them there",
             },
             {
               when: { any: [{ chose: "ru-accompany" }, { chose: "ru-sedate" }] },
@@ -1484,15 +1498,29 @@ export const twoPatientsOneClinician: ClinicalCase = {
                 all: [
                   { not: { visited: "removal-unfolds" } },
                   { clockBelow: 55 },
+                  { metricAtLeast: ["agencyDignity", 2] },
+                  { metricAtLeast: ["trustRelationship", 1] },
                 ],
               },
               nodeId: "ending-both-held",
-              reason: "Both patients were attended, and Eleanor's care ran on time",
+              reason:
+                "Nobody was removed, Eleanor's care ran on time, and both patients kept their standing with you",
+            },
+            {
+              when: {
+                all: [
+                  { not: { visited: "removal-unfolds" } },
+                  { clockAtLeast: 55 },
+                ],
+              },
+              nodeId: "ending-swap-cost",
+              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
             },
             {
               when: { not: { visited: "removal-unfolds" } },
-              nodeId: "ending-swap-cost",
-              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
+              nodeId: "ending-frayed",
+              reason:
+                "Both patients stayed in the department, but dignity and trust were spent to keep them there",
             },
             {
               when: { any: [{ chose: "ru-accompany" }, { chose: "ru-sedate" }] },
@@ -1548,15 +1576,29 @@ export const twoPatientsOneClinician: ClinicalCase = {
                 all: [
                   { not: { visited: "removal-unfolds" } },
                   { clockBelow: 55 },
+                  { metricAtLeast: ["agencyDignity", 2] },
+                  { metricAtLeast: ["trustRelationship", 1] },
                 ],
               },
               nodeId: "ending-both-held",
-              reason: "Both patients were attended, and Eleanor's care ran on time",
+              reason:
+                "Nobody was removed, Eleanor's care ran on time, and both patients kept their standing with you",
+            },
+            {
+              when: {
+                all: [
+                  { not: { visited: "removal-unfolds" } },
+                  { clockAtLeast: 55 },
+                ],
+              },
+              nodeId: "ending-swap-cost",
+              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
             },
             {
               when: { not: { visited: "removal-unfolds" } },
-              nodeId: "ending-swap-cost",
-              reason: "Marcus stayed and was cared for — Eleanor's clock paid for it",
+              nodeId: "ending-frayed",
+              reason:
+                "Both patients stayed in the department, but dignity and trust were spent to keep them there",
             },
             {
               when: { any: [{ chose: "ru-accompany" }, { chose: "ru-sedate" }] },

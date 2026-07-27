@@ -7,6 +7,7 @@ import type {
   NextRule,
   PathStep,
 } from "./types";
+import { initialMetrics } from "./types";
 
 /** Runtime state the condition system evaluates against. */
 export interface EvalContext {
@@ -83,6 +84,66 @@ export function characterById(c: ClinicalCase, id: string) {
   const ch = c.characters.find((ch) => ch.id === id);
   if (!ch) throw new Error(`Case ${c.id}: missing character ${id}`);
   return ch;
+}
+
+/**
+ * Rebuild engine state by walking a saved path up to (not including) an index.
+ * Used by counterfactual branching: preserve everything the user decided
+ * before the divergence point, then hand control back at that node.
+ */
+export function replayPrefix(
+  c: ClinicalCase,
+  path: PathStep[],
+  uptoIndex: number
+): {
+  nodeId: string;
+  metrics: MetricState;
+  clock: number;
+  path: PathStep[];
+  queue: DelayedOutcome[];
+} {
+  let metrics = initialMetrics();
+  let queue: DelayedOutcome[] = [];
+  let clock = 0;
+  const prefix: PathStep[] = [];
+
+  for (let i = 0; i < uptoIndex && i < path.length; i++) {
+    const step = path[i];
+    const node = nodeById(c, step.nodeId);
+
+    // Deliver anything that had come due on entering this node.
+    const due = [
+      ...dueDelayed(queue, { kind: "node", nodeId: step.nodeId }),
+      ...dueDelayed(queue, { kind: "clock", minutes: clock }),
+    ];
+    if (due.length) {
+      queue = queue.filter((d) => !due.includes(d));
+      metrics = due.reduce(
+        (m, d) => (d.effects ? applyEffects(m, d.effects) : m),
+        metrics
+      );
+    }
+
+    metrics = applyEffects(metrics, step.effectsApplied);
+    clock = step.scenarioClockAfter;
+
+    const res = step.resolution;
+    const feedback =
+      "choiceId" in res
+        ? node.choices.find((ch) => ch.id === res.choiceId)?.feedback
+        : node.inactionOutcome?.feedback;
+    if (feedback?.delayed?.length) queue = [...queue, ...feedback.delayed];
+
+    prefix.push(step);
+  }
+
+  return {
+    nodeId: path[Math.min(uptoIndex, path.length - 1)].nodeId,
+    metrics,
+    clock,
+    path: prefix,
+    queue,
+  };
 }
 
 /** Sum metric values per stakeholder for rollup displays. */

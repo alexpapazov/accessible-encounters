@@ -4,9 +4,10 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
-import { getAttempt, type AttemptRow } from "@/lib/attempts";
+import { getAttempt, listCaseAttempts, type AttemptRow } from "@/lib/attempts";
 import { cases } from "@/lib/data/cases";
 import Scene from "@/components/Scene";
+import DecisionMap from "@/components/DecisionMap";
 import type {
   Choice,
   ClinicalCase,
@@ -41,6 +42,8 @@ export default function AttemptReviewPage() {
   const { id } = useParams<{ id: string }>();
   const { enabled, loading, user } = useAuth();
   const [attempt, setAttempt] = useState<AttemptRow | null | "missing">(null);
+  const [parent, setParent] = useState<AttemptRow | null>(null);
+  const [siblings, setSiblings] = useState<AttemptRow[]>([]);
   const [stepIndex, setStepIndex] = useState(0);
   const [openRoad, setOpenRoad] = useState<string | null>(null);
   const [showUnseen, setShowUnseen] = useState(false);
@@ -48,6 +51,12 @@ export default function AttemptReviewPage() {
   useEffect(() => {
     if (user && id) getAttempt(id).then((row) => setAttempt(row ?? "missing"));
   }, [user, id]);
+
+  useEffect(() => {
+    if (!user || !attempt || attempt === "missing") return;
+    listCaseAttempts(user.id, attempt.case_id).then(setSiblings);
+    if (attempt.parent_attempt_id) getAttempt(attempt.parent_attempt_id).then(setParent);
+  }, [user, attempt]);
 
   const c: ClinicalCase | undefined = useMemo(
     () =>
@@ -119,6 +128,26 @@ export default function AttemptReviewPage() {
         </span>
       </div>
 
+      {attempt.parent_attempt_id && (
+        <p className="mt-3 rounded-xl border border-[#6E5A7A] bg-[#EDE4F0] p-3 text-sm leading-relaxed text-[#4A3D52]">
+          <span className="font-medium">Counterfactual replay.</span> Branched from{" "}
+          {parent ? (
+            <Link
+              href={`/dashboard/attempt/${parent.id}`}
+              className="underline hover:text-[#6E5A7A]"
+            >
+              your {new Date(parent.completed_at ?? parent.started_at).toLocaleDateString()}{" "}
+              attempt
+            </Link>
+          ) : (
+            "an earlier attempt"
+          )}
+          {attempt.branch_node_id
+            ? ` at “${nodeById(c, attempt.branch_node_id).title}”.`
+            : "."}
+        </p>
+      )}
+
       <div className="mt-4 flex items-center justify-between gap-3">
         <button
           onClick={() => goto(stepIndex - 1)}
@@ -156,10 +185,12 @@ export default function AttemptReviewPage() {
       </div>
 
       {onSummary ? (
-        <Summary attempt={attempt} c={c} />
+        <Summary attempt={attempt} parent={parent} c={c} />
       ) : (
         <StepView
           c={c}
+          attemptId={attempt.id}
+          stepIndex={stepIndex}
           step={step!}
           isTimed={isTimed}
           openRoad={openRoad}
@@ -168,12 +199,22 @@ export default function AttemptReviewPage() {
           setShowUnseen={setShowUnseen}
         />
       )}
+
+      <DecisionMap
+        c={c}
+        path={path}
+        allPaths={siblings.map((s) => s.path)}
+        currentIndex={onSummary ? -1 : stepIndex}
+        onSelect={goto}
+      />
     </div>
   );
 }
 
 function StepView({
   c,
+  attemptId,
+  stepIndex,
   step,
   isTimed,
   openRoad,
@@ -182,6 +223,8 @@ function StepView({
   setShowUnseen,
 }: {
   c: ClinicalCase;
+  attemptId: string;
+  stepIndex: number;
   step: PathStep;
   isTimed: boolean;
   openRoad: string | null;
@@ -341,9 +384,17 @@ function StepView({
 
       {roads.length > 0 && (
         <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
-          <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
-            Roads not taken
-          </p>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
+              Roads not taken
+            </p>
+            <Link
+              href={`/case/${c.id}?branchFrom=${attemptId}&atStep=${stepIndex}`}
+              className="rounded-full bg-[#6E5A7A] px-3.5 py-1 text-sm font-medium text-white transition-colors hover:bg-[#5C4A66]"
+            >
+              Explore another decision from this point →
+            </Link>
+          </div>
           <p className="mt-1 text-sm text-[#7A6A5E]">
             What each would have set off immediately — the full paths stay yours to
             discover by replaying.
@@ -378,7 +429,15 @@ function StepView({
   );
 }
 
-function Summary({ attempt, c }: { attempt: AttemptRow; c: ClinicalCase }) {
+function Summary({
+  attempt,
+  parent,
+  c,
+}: {
+  attempt: AttemptRow;
+  parent: AttemptRow | null;
+  c: ClinicalCase;
+}) {
   const metrics = attempt.final_metrics;
   return (
     <div className="mt-4 space-y-4">
@@ -386,6 +445,51 @@ function Summary({ attempt, c }: { attempt: AttemptRow; c: ClinicalCase }) {
         <p className="rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-5 leading-relaxed text-[#5A4A40]">
           {attempt.outcome_summary}
         </p>
+      )}
+
+      {parent?.final_metrics && metrics && (
+        <div className="rounded-2xl border border-[#6E5A7A] bg-white p-5">
+          <h2 className="text-lg font-semibold text-[#3A2B26]">
+            Original path vs. this counterfactual
+          </h2>
+          <p className="mt-1 text-sm text-[#7A6A5E]">
+            Same case, same starting decisions — the difference is what you did
+            after the branch.
+          </p>
+          <div className="mt-3 space-y-2">
+            {STAKEHOLDERS.map((s) => {
+              const a = stakeholderTotals(parent.final_metrics as MetricState)[s.key];
+              const b = stakeholderTotals(metrics as MetricState)[s.key];
+              const d = b - a;
+              return (
+                <div
+                  key={s.key}
+                  className="flex items-baseline justify-between gap-3 rounded-lg bg-[#FBF3E9] px-3 py-2"
+                >
+                  <span className="text-sm font-medium tracking-wide text-[#3A2B26]">
+                    {s.label}
+                  </span>
+                  <span className="text-sm text-[#7A6A5E]">
+                    original {a > 0 ? `+${a}` : a} → this {b > 0 ? `+${b}` : b}{" "}
+                    <span
+                      className={`font-semibold ${
+                        d > 0 ? "text-[#2E6B66]" : d < 0 ? "text-[#A34A2E]" : "text-[#7A6A5E]"
+                      }`}
+                    >
+                      ({d > 0 ? `+${d}` : d})
+                    </span>
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {parent.outcome_summary && parent.outcome_summary !== attempt.outcome_summary && (
+            <p className="mt-3 text-sm leading-relaxed text-[#5A4A40]">
+              <span className="font-medium text-[#3A2B26]">Originally: </span>
+              {parent.outcome_summary}
+            </p>
+          )}
+        </div>
       )}
       {metrics && (
         <div className="rounded-2xl border border-[#E7D6C4] bg-white p-5">

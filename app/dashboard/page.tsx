@@ -119,7 +119,18 @@ export default function DashboardPage() {
               return (
                 <div key={a.id} className="rounded-xl border border-[#E7D6C4] bg-white p-4">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-medium text-[#3A2B26]">{c.title}</p>
+                    <p className="font-medium text-[#3A2B26]">
+                      {c.title}
+                      <span
+                        className={`ml-2 rounded px-1.5 py-0.5 text-xs font-medium ${
+                          a.parent_attempt_id
+                            ? "bg-[#EDE4F0] text-[#6E5A7A]"
+                            : "bg-[#F6E3D0] text-[#8A5A44]"
+                        }`}
+                      >
+                        {a.parent_attempt_id ? "branch replay" : "full run"}
+                      </span>
+                    </p>
                     <p className="text-xs text-[#7A6A5E]">
                       {a.mode} · {new Date(a.completed_at ?? a.started_at).toLocaleString()}
                     </p>
