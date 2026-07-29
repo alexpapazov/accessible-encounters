@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import { getAttempt, listCaseAttempts, type AttemptRow } from "@/lib/attempts";
 import { cases } from "@/lib/data/cases";
-import Scene from "@/components/Scene";
+import SceneRenderer from "@/components/scenes";
 import DecisionMap from "@/components/DecisionMap";
 import ReflectionComposer from "@/components/ReflectionComposer";
 import type {
@@ -16,7 +16,12 @@ import type {
   PathStep,
 } from "@/lib/types";
 import { METRICS, STAKEHOLDERS, metricsFor } from "@/lib/types";
-import { characterById, nodeById, stakeholderTotals } from "@/lib/engine";
+import {
+  buildScoreRows,
+  characterById,
+  nodeById,
+  patientMetricsFromPath,
+} from "@/lib/engine";
 
 const metricLabel = (key: string) => METRICS.find((m) => m.key === key)?.label ?? key;
 
@@ -112,7 +117,7 @@ export default function AttemptReviewPage() {
   };
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-5xl px-6 py-8">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
           <Link href="/dashboard" className="text-sm text-[#8A5A44] hover:underline">
@@ -260,7 +265,7 @@ function StepView({
   return (
     <>
       <div className="mt-4 overflow-hidden rounded-2xl border border-[#E7D6C4] shadow-sm">
-        <Scene
+        <SceneRenderer
           scene={node.scene}
           characters={c.characters}
           timeOfDay={node.timeOfDay}
@@ -457,21 +462,32 @@ function Summary({
             Original path vs. this counterfactual
           </h2>
           <p className="mt-1 text-sm text-[#7A6A5E]">
-            Same case, same starting decisions — the difference is what you did
+            Same case, same starting decisions. The difference is what you did
             after the branch.
           </p>
           <div className="mt-3 space-y-2">
-            {STAKEHOLDERS.map((s) => {
-              const a = stakeholderTotals(parent.final_metrics as MetricState)[s.key];
-              const b = stakeholderTotals(metrics as MetricState)[s.key];
-              const d = b - a;
-              return (
+            {(() => {
+              const before = buildScoreRows(
+                c,
+                parent.final_metrics as MetricState,
+                patientMetricsFromPath(c, parent.path)
+              );
+              const after = buildScoreRows(
+                c,
+                metrics as MetricState,
+                patientMetricsFromPath(c, attempt.path)
+              );
+              return after.map((row, i) => {
+                const a = before[i]?.value ?? 0;
+                const b = row.value;
+                const d = b - a;
+                return (
                 <div
-                  key={s.key}
+                  key={row.key}
                   className="flex items-baseline justify-between gap-3 rounded-lg bg-[#FBF3E9] px-3 py-2"
                 >
                   <span className="text-sm font-medium tracking-wide text-[#3A2B26]">
-                    {s.label}
+                    {row.label}
                   </span>
                   <span className="text-sm text-[#7A6A5E]">
                     original {a > 0 ? `+${a}` : a} → this {b > 0 ? `+${b}` : b}{" "}
@@ -484,8 +500,9 @@ function Summary({
                     </span>
                   </span>
                 </div>
-              );
-            })}
+                );
+              });
+            })()}
           </div>
           {parent.outcome_summary && parent.outcome_summary !== attempt.outcome_summary && (
             <p className="mt-3 text-sm leading-relaxed text-[#5A4A40]">
@@ -499,13 +516,12 @@ function Summary({
         <div className="rounded-2xl border border-[#E7D6C4] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#3A2B26]">Where it all landed</h2>
           <div className="mt-3 space-y-3">
-            {STAKEHOLDERS.map((s) => {
-              const totals = stakeholderTotals(metrics as MetricState);
-              const v = totals[s.key];
+            {buildScoreRows(c, metrics as MetricState, patientMetricsFromPath(c, attempt.path)).map((row) => {
+              const v = row.value;
               return (
-                <div key={s.key}>
-                  <div className="flex items-baseline justify-between">
-                    <span className="font-medium tracking-wide text-[#3A2B26]">{s.label}</span>
+                <div key={row.key}>
+                  <div className="flex items-baseline justify-between gap-3">
+                    <span className="font-medium tracking-wide text-[#3A2B26]">{row.label}</span>
                     <span
                       className={`text-sm font-semibold ${
                         v > 0 ? "text-[#2E6B66]" : v < 0 ? "text-[#A34A2E]" : "text-[#7A6A5E]"
@@ -515,8 +531,8 @@ function Summary({
                     </span>
                   </div>
                   <div className="mt-1 grid gap-x-6 gap-y-1 sm:grid-cols-2">
-                    {metricsFor(s.key).map((m) => {
-                      const mv = (metrics as MetricState)[m.key];
+                    {metricsFor(row.stakeholder).map((m) => {
+                      const mv = row.source[m.key];
                       return (
                         <div key={m.key} className="flex items-baseline justify-between gap-4">
                           <span className="text-sm text-[#5A4A40]">{m.label}</span>
@@ -567,7 +583,7 @@ function Summary({
 
 function Shell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-[#3A2B26]">{title}</h1>
       <div className="mt-6">{children}</div>
     </div>

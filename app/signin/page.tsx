@@ -18,7 +18,7 @@ export default function SignInPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md px-4 py-16">
+    <div className="mx-auto max-w-md px-6 py-16">
       <h1 className="text-2xl font-semibold text-[#3A2B26]">Sign in</h1>
       <p className="mt-2 leading-relaxed text-[#5A4A40]">
         Signing in lets the simulator save your attempts, so you can review your

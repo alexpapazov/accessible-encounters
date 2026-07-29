@@ -7,7 +7,7 @@ import { listAttempts, type AttemptRow } from "@/lib/attempts";
 import { analyzeAttempts } from "@/lib/patterns";
 import { cases } from "@/lib/data/cases";
 import { METRICS, STAKEHOLDERS, metricsFor, type MetricState } from "@/lib/types";
-import { stakeholderTotals } from "@/lib/engine";
+import { buildScoreRows, patientMetricsFromPath, stakeholderTotals } from "@/lib/engine";
 
 const caseById = (id: string) => cases.find((c) => c.id === id);
 
@@ -153,7 +153,7 @@ export default function DashboardPage() {
         <h2 className="text-lg font-semibold text-[#3A2B26]">Completed attempts</h2>
         {completedAttempts.length === 0 ? (
           <p className="mt-2 leading-relaxed text-[#5A4A40]">
-            Nothing completed yet —{" "}
+            Nothing completed yet.{" "}
             <Link href="/" className="text-[#8A5A44] underline">
               start an encounter
             </Link>
@@ -164,7 +164,11 @@ export default function DashboardPage() {
             {completedAttempts.map((a) => {
               const c = caseById(a.case_id);
               if (!c || !a.final_metrics) return null;
-              const totals = stakeholderTotals(a.final_metrics);
+              const rows = buildScoreRows(
+                c,
+                a.final_metrics,
+                patientMetricsFromPath(c, a.path)
+              );
               const isOpen = expanded === a.id;
               return (
                 <div key={a.id} className="rounded-xl border border-[#E7D6C4] bg-white p-4">
@@ -191,13 +195,13 @@ export default function DashboardPage() {
                     </p>
                   )}
                   <div className="mt-3 grid gap-2 sm:grid-cols-3">
-                    {STAKEHOLDERS.map((s) => {
-                      const v = totals[s.key];
+                    {rows.map((row) => {
+                      const v = row.value;
                       return (
-                        <div key={s.key} className="rounded-lg bg-[#FBF3E9] px-3 py-2">
-                          <div className="flex items-baseline justify-between">
+                        <div key={row.key} className="rounded-lg bg-[#FBF3E9] px-3 py-2">
+                          <div className="flex items-baseline justify-between gap-2">
                             <span className="text-xs font-medium tracking-wide text-[#8A5A44]">
-                              {s.label}
+                              {row.label}
                             </span>
                             <span
                               className={`text-sm font-semibold ${
@@ -234,11 +238,11 @@ export default function DashboardPage() {
                   </div>
                   {isOpen && (
                     <div className="mt-3 grid gap-x-6 gap-y-1 rounded-lg bg-[#FBF3E9] p-3 sm:grid-cols-2">
-                      {STAKEHOLDERS.flatMap((s) =>
-                        metricsFor(s.key).map((m) => {
-                          const v = (a.final_metrics as MetricState)[m.key];
+                      {rows.flatMap((row) =>
+                        metricsFor(row.stakeholder).map((m) => {
+                          const v = (row.source as MetricState)[m.key];
                           return (
-                            <div key={m.key} className="flex items-baseline justify-between gap-4">
+                            <div key={row.key + m.key} className="flex items-baseline justify-between gap-4">
                               <span className="text-sm text-[#3A2B26]">{m.label}</span>
                               <span
                                 className={`text-sm font-medium ${
@@ -269,7 +273,7 @@ export default function DashboardPage() {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-6xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-[#3A2B26]">Your dashboard</h1>
       <div className="mt-6">{children}</div>
     </div>

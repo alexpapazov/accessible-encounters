@@ -27,16 +27,24 @@ import type {
 import { METRICS, STAKEHOLDERS, initialMetrics, metricsFor } from "@/lib/types";
 import {
   applyEffects,
+  adjustSceneMoods,
+  applyPatientEffects,
+  clampEffects,
+  clampPatientEffects,
+  mergePatientEffects,
   characterById,
   dueDelayed,
   evalCondition,
+  initialPatientMetrics,
+  isMultiPatient,
   nodeById,
+  buildScoreRows,
   replayPrefix,
   resolveNext,
   stakeholderTotals,
 } from "@/lib/engine";
 import type { EvalContext } from "@/lib/engine";
-import Scene from "./Scene";
+import SceneRenderer from "./scenes";
 import ReflectionComposer from "./ReflectionComposer";
 
 function evalConditionSafe(cond: Condition, ctx: EvalContext): boolean {
@@ -54,14 +62,32 @@ interface Props {
 type Phase =
   | { kind: "node" }
   | { kind: "feedback"; choice: Choice }
-  /** Timed mode: metric chips flash briefly, then auto-advance. */
-  | { kind: "chips"; effects: Effects; next: NextRule[]; inactionText?: string }
+  /**
+   * Timed mode: what the decision did in the short term. The clock is stopped
+   * here, and the next decision's timer does not start until Continue.
+   */
+  | {
+      kind: "impact";
+      immediate: string;
+      effects: Effects;
+      next: NextRule[];
+    }
+  /** Timed mode: the clock ran out; show what got chosen before its impact. */
+  | {
+      kind: "timeout";
+      label: string;
+      dialogue: boolean;
+      inactionText?: string;
+      immediate: string;
+      effects: Effects;
+      next: NextRule[];
+    }
   | { kind: "daybreak"; toNodeId: string; delivered: DelayedOutcome[] };
 
 const metricLabel = (key: string) => METRICS.find((m) => m.key === key)?.label ?? key;
 
 const GRACE_MS = 2000;
-const CHIPS_MS = 2400;
+
 
 export default function CasePlayer({ clinicalCase: c }: Props) {
   const { enabled: authEnabled, loading: authLoading, user } = useAuth();
@@ -70,6 +96,9 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   );
   const [nodeId, setNodeId] = useState(c.startNodeId);
   const [metrics, setMetrics] = useState<MetricState>(initialMetrics);
+  const [patients, setPatients] = useState<Record<string, MetricState>>(() =>
+    initialPatientMetrics(c)
+  );
   const [clock, setClock] = useState(0);
   const [path, setPath] = useState<PathStep[]>([]);
   const [phase, setPhase] = useState<Phase>({ kind: "node" });
@@ -120,6 +149,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
       setMode(parent.mode);
       setNodeId(prefix.nodeId);
       setMetrics(prefix.metrics);
+      setPatients(prefix.patients);
       setClock(prefix.clock);
       setPath(prefix.path);
       setQueue(prefix.queue);
@@ -185,24 +215,30 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     const hesMin = isTimed && hesRate ? Math.floor(elapsedSec / hesRate) : 0;
     const newClock = clock + hesMin + (choice.timeCost ?? 0);
 
-    /* Merge authored effects with timing-derived operational efficiency. */
-    const effects: Effects = { ...choice.effects };
+    /*
+     * Merge authored effects with the timing-derived operational efficiency
+     * bonuses, then clamp: no single decision moves a metric by more than
+     * MAX_EFFECT_PER_DECISION, however the bonuses stack.
+     */
+    const raw: Effects = { ...choice.effects };
     if (isTimed && !opts.timedOut) {
       const speed = c.timing?.decisionSpeed?.find((t) => elapsedSec <= t.withinSeconds);
-      if (speed)
-        effects.operationalEfficiency = (effects.operationalEfficiency ?? 0) + speed.delta;
+      if (speed) raw.operationalEfficiency = (raw.operationalEfficiency ?? 0) + speed.delta;
     }
     const milestone = c.timing?.milestones?.find((m) => m.onChoiceId === choice.id);
     if (milestone) {
       const tier = milestone.tiers.find((t) => newClock <= t.byMinute);
-      if (tier)
-        effects.operationalEfficiency = (effects.operationalEfficiency ?? 0) + tier.delta;
+      if (tier) raw.operationalEfficiency = (raw.operationalEfficiency ?? 0) + tier.delta;
     }
+    const effects = clampEffects(raw);
+    const patientEffects = clampPatientEffects(choice.patientEffects);
 
-    const newMetrics = applyEffects(metrics, effects);
-    const ctx = { metrics: newMetrics, scenarioClock: newClock, path };
+    const newMetrics = applyEffects(metrics, mergePatientEffects(effects, patientEffects));
+    const newPatients = applyPatientEffects(patients, patientEffects);
+    const ctx = { metrics: newMetrics, scenarioClock: newClock, path, patients: newPatients };
     const rule = resolveNext(choice.next, ctx);
     setMetrics(newMetrics);
+    setPatients(newPatients);
     setClock(newClock);
     setLiveHesMin(0);
     setPath((p) => [
@@ -213,6 +249,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         decisionMs,
         scenarioClockAfter: newClock,
         effectsApplied: effects,
+        patientEffectsApplied: patientEffects,
         branchReason: rule.reason,
       },
     ]);
@@ -220,9 +257,23 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
       setQueue((q) => [...q, ...choice.feedback.delayed!]);
     }
     setPhase(
-      isTimed
-        ? { kind: "chips", effects, next: choice.next }
-        : { kind: "feedback", choice }
+      !isTimed
+        ? { kind: "feedback", choice }
+        : opts.timedOut
+          ? {
+              kind: "timeout",
+              label: choice.label,
+              dialogue: Boolean(choice.dialogue),
+              immediate: choice.feedback.immediate,
+              effects,
+              next: choice.next,
+            }
+          : {
+              kind: "impact",
+              immediate: choice.feedback.immediate,
+              effects,
+              next: choice.next,
+            }
     );
   };
 
@@ -232,8 +283,10 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
       const decisionMs = Date.now() - nodeShownAt.current;
       const hesMin = hesRate ? Math.floor(decisionMs / 1000 / hesRate) : 0;
       const newClock = clock + hesMin;
-      const newMetrics = applyEffects(metrics, io.effects);
+      const newMetrics = applyEffects(metrics, mergePatientEffects(io.effects, io.patientEffects));
+      const newPatients = applyPatientEffects(patients, io.patientEffects);
       setMetrics(newMetrics);
+      setPatients(newPatients);
       setClock(newClock);
       setLiveHesMin(0);
       setPath((p) => [
@@ -244,10 +297,19 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           decisionMs,
           scenarioClockAfter: newClock,
           effectsApplied: io.effects,
+          patientEffectsApplied: io.patientEffects,
         },
       ]);
       if (io.feedback.delayed?.length) setQueue((q) => [...q, ...io.feedback.delayed!]);
-      setPhase({ kind: "chips", effects: io.effects, next: io.next, inactionText: io.text });
+      setPhase({
+        kind: "timeout",
+        label: "",
+        dialogue: false,
+        inactionText: io.text,
+        immediate: io.feedback.immediate,
+        effects: io.effects,
+        next: io.next,
+      });
       return;
     }
     const saver = node.choices.find((ch) => ch.timeSaver);
@@ -257,7 +319,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   latestTimeout.current = handleTimeout;
 
   const advanceRules = (rules: NextRule[]) => {
-    const rule = resolveNext(rules, { metrics, scenarioClock: clock, path });
+    const rule = resolveNext(rules, { metrics, scenarioClock: clock, path, patients });
     const target = nodeById(c, rule.nodeId);
     const dayChanged =
       target.day !== undefined && node.day !== undefined && target.day > node.day;
@@ -287,7 +349,13 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   const deliver = (due: DelayedOutcome[]) => {
     if (!due.length) return;
     setQueue((q) => q.filter((d) => !due.includes(d)));
-    setMetrics((m) => due.reduce((acc, d) => (d.effects ? applyEffects(acc, d.effects) : acc), m));
+    setMetrics((m) =>
+      due.reduce(
+        (acc, d) => applyEffects(acc, mergePatientEffects(d.effects ?? {}, d.patientEffects)),
+        m
+      )
+    );
+    setPatients((ps) => due.reduce((acc, d) => applyPatientEffects(acc, d.patientEffects), ps));
   };
 
   const restart = () => {
@@ -299,6 +367,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     setMode(c.modes.length === 1 ? c.modes[0] : null);
     setNodeId(c.startNodeId);
     setMetrics(initialMetrics());
+    setPatients(initialPatientMetrics(c));
     setClock(0);
     setPath([]);
     setPhase({ kind: "node" });
@@ -362,24 +431,16 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     return () => clearInterval(interval);
   }, [timerActive, nodeId, node.timerSeconds, hesRate]);
 
-  /* Chips flash briefly, then the world moves on. */
-  useEffect(() => {
-    if (phase.kind !== "chips") return;
-    const t = setTimeout(() => advanceRules(phase.next), CHIPS_MS);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
-
   /* ------------------------------------------------------------ */
   /* Gates and pickers                                             */
   /* ------------------------------------------------------------ */
 
   if (authEnabled && !authLoading && !user) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center">
+      <div className="mx-auto max-w-3xl px-6 py-16 text-center">
         <h1 className="text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
         <p className="mx-auto mt-3 max-w-md leading-relaxed text-[#5A4A40]">
-          Sign in to play this encounter — your decisions, timing, and outcomes
+          Sign in to play this encounter. Your decisions, timing, and outcomes
           are saved so you can review them and explore other paths.
         </p>
         <Link
@@ -398,7 +459,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
     new URLSearchParams(window.location.search).has("branchFrom")
   ) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16 text-center text-[#7A6A5E]">
+      <div className="mx-auto max-w-3xl px-6 py-16 text-center text-[#7A6A5E]">
         Rebuilding your earlier decisions…
       </div>
     );
@@ -406,7 +467,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
 
   if (mode === null) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-12">
+      <div className="mx-auto max-w-4xl px-6 py-12">
         <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
           ← All encounters
         </Link>
@@ -416,18 +477,18 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <button
             onClick={() => setMode("deliberative")}
-            aria-label="Play in deliberative mode — no countdown"
+            aria-label="Play in deliberative mode, no countdown"
             className="rounded-2xl border border-[#E7D6C4] bg-white p-5 text-left transition-all hover:border-[#4FA39C] hover:shadow-sm"
           >
             <p className="text-lg font-semibold text-[#3A2B26]">Deliberative</p>
             <p className="mt-2 text-sm leading-relaxed text-[#5A4A40]">
-              No countdown. Sit with each decision as long as you need — this
+              No countdown. Sit with each decision as long as you need. This
               mode reveals what you value when nothing forces your hand.
             </p>
           </button>
           <button
             onClick={() => setMode("timed")}
-            aria-label="Play in time-constrained mode — decisions expire"
+            aria-label="Play in time-constrained mode, decisions expire"
             className="rounded-2xl border border-[#E7D6C4] bg-white p-5 text-left transition-all hover:border-[#E88C6E] hover:shadow-sm"
           >
             <p className="text-lg font-semibold text-[#3A2B26]">Time-constrained</p>
@@ -457,7 +518,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   if (phase.kind === "daybreak") {
     const target = nodeById(c, phase.toNodeId);
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16">
+      <div className="mx-auto max-w-3xl px-6 py-16">
         <div className="rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-8 text-center">
           <div className="mx-auto flex h-16 w-16 flex-col overflow-hidden rounded-xl border border-[#D97B5D] bg-white">
             <div className="h-5 bg-[#E88C6E]" />
@@ -499,6 +560,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         clinicalCase={c}
         mode={mode}
         metrics={metrics}
+        patients={patients}
         path={path}
         clock={clock}
         outcomeSummary={node.outcomeSummary}
@@ -540,13 +602,21 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           />
         </div>
       )}
+      {timerActive && timerFraction !== null && timerFraction <= 0.25 && (
+        <div
+          aria-hidden="true"
+          className="urgent-flash pointer-events-none fixed inset-0 z-40"
+          style={{ boxShadow: "inset 0 0 0 10px #E8452F" }}
+        />
+      )}
+
       {/* Spoken equivalent of the countdown bar. */}
       <div className="sr-only" role="status" aria-live="assertive">
         {timerActive ? timeAnnouncement : ""}
       </div>
 
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <header className="mb-4 flex items-baseline justify-between gap-4">
+      <div className="mx-auto max-w-4xl px-6 py-8">
+        <header className="mb-5 flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
               ← All encounters
@@ -622,8 +692,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         )}
 
         <div className="overflow-hidden rounded-2xl border border-[#E7D6C4] shadow-sm">
-          <Scene
-            scene={{ ...node.scene, bubbles: sceneBubbles }}
+          <SceneRenderer
+            scene={{
+              ...adjustSceneMoods(c, node.scene, patients, metrics),
+              bubbles: sceneBubbles,
+            }}
             characters={c.characters}
             timeOfDay={node.timeOfDay}
             scenarioMinutes={displayClock}
@@ -643,8 +716,8 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           </div>
         )}
 
-        <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
-          <p className="leading-relaxed text-[#3A2B26]">{situation}</p>
+        <div className="mt-5 rounded-2xl border border-[#E7D6C4] bg-white p-6">
+          <p className="text-lg leading-relaxed text-[#3A2B26]">{situation}</p>
 
           {perspectives.length > 0 && (
             <div className="mt-4">
@@ -675,7 +748,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         </div>
 
         {phase.kind === "node" && (
-          <div className="mt-4 space-y-3">
+          <div className="mt-5 space-y-3">
             <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
               What do you do?
             </p>
@@ -709,34 +782,76 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           />
         )}
 
-        {phase.kind === "chips" && (
+        {phase.kind === "timeout" && (
           <div
-            className="mt-4 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4"
+            className="mt-5 rounded-xl border-2 border-[#E8452F] bg-[#FBE3DA] p-5"
             role="status"
-            aria-live="polite"
+            aria-live="assertive"
           >
-            {phase.inactionText && (
-              <p className="mb-2 leading-relaxed text-[#4A3230]">{phase.inactionText}</p>
-            )}
-            {c.scoring === "standard" && (
-              <div className="flex flex-wrap gap-2">
-                {Object.entries(phase.effects).map(([k, v]) =>
-                  v ? (
-                    <span
-                      key={k}
-                      className={`rounded-full px-3 py-1 text-xs font-medium ${
-                        v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
-                      }`}
-                    >
-                      {metricLabel(k)} {v > 0 ? `+${v}` : v}
-                    </span>
-                  ) : null
-                )}
-              </div>
-            )}
-            <p className="mt-2 text-xs italic text-[#7A6A5E]">
-              The shift keeps moving — full debrief when it ends.
+            <p className="text-sm font-semibold uppercase tracking-wide text-[#A34A2E]">
+              Time ran out
             </p>
+            {phase.inactionText ? (
+              <p className="mt-2 leading-relaxed text-[#4A3230]">{phase.inactionText}</p>
+            ) : (
+              <>
+                <p className="mt-1 text-sm text-[#8A5A44]">
+                  You did not decide, so the default happened:
+                </p>
+                <p className="mt-2 text-lg leading-snug text-[#3A2B26]">
+                  {phase.dialogue ? `“${phase.label}”` : phase.label}
+                </p>
+              </>
+            )}
+            <button
+              onClick={() =>
+                setPhase({
+                  kind: "impact",
+                  immediate: phase.immediate,
+                  effects: phase.effects,
+                  next: phase.next,
+                })
+              }
+              className="mt-4 rounded-xl bg-[#A34A2E] px-4 py-2 font-medium text-white transition-colors hover:bg-[#8A3A22]"
+            >
+              See what that did
+            </button>
+          </div>
+        )}
+
+        {phase.kind === "impact" && (
+          <div className="mt-5 space-y-3" role="status" aria-live="polite">
+            <div className="rounded-2xl border border-[#E7D6C4] bg-white p-6">
+              <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
+                What happens now
+              </p>
+              <p className="mt-1 text-lg leading-relaxed text-[#3A2B26]">{phase.immediate}</p>
+              {c.scoring === "standard" && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {Object.entries(phase.effects).map(([k, v]) =>
+                    v ? (
+                      <span
+                        key={k}
+                        className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
+                        }`}
+                      >
+                        {metricLabel(k)} {v > 0 ? `+${v}` : v}
+                      </span>
+                    ) : null
+                  )}
+                </div>
+              )}
+              <p className="mt-3 text-sm italic text-[#7A6A5E]">
+                The clock is stopped. It starts again on the next decision.
+              </p>
+            </div>
+            <button
+              onClick={() => advanceRules(phase.next)}
+              className="w-full rounded-xl bg-[#E88C6E] px-4 py-3 font-medium text-white transition-colors hover:bg-[#D97B5D]"
+            >
+              Continue
+            </button>
           </div>
         )}
 
@@ -854,6 +969,7 @@ function Results({
   clinicalCase: c,
   mode,
   metrics,
+  patients,
   path,
   clock,
   outcomeSummary,
@@ -864,6 +980,7 @@ function Results({
   clinicalCase: ClinicalCase;
   mode: CaseMode;
   metrics: MetricState;
+  patients: Record<string, MetricState>;
   path: PathStep[];
   clock: number;
   outcomeSummary?: string;
@@ -876,7 +993,13 @@ function Results({
   const totals = stakeholderTotals(metrics);
   const RANGE = 8;
 
-  const ctx = { metrics, scenarioClock: clock, path };
+  const ctx = { metrics, scenarioClock: clock, path, patients };
+
+  /*
+   * Multi-patient cases get one PATIENT row per patient, so harm to one can
+   * never be cancelled out by good care of the other.
+   */
+  const rows = buildScoreRows(c, metrics, patients);
   const shownReflections = c.epilogue.reflections.filter((r, i, all) => {
     const firstMatch = all.find(
       (x) => x.characterId === r.characterId && (!x.when || evalConditionSafe(x.when, ctx))
@@ -892,7 +1015,7 @@ function Results({
       : undefined;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-8">
+    <div className="mx-auto max-w-4xl px-6 py-8">
       <Link href="/" className="text-sm text-[#8A5A44] hover:underline">
         ← All encounters
       </Link>
@@ -907,33 +1030,34 @@ function Results({
         <div className="mt-6 rounded-2xl border border-[#E7D6C4] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#3A2B26]">How the encounter went</h2>
           <p className="mt-1 text-sm text-[#7A6A5E]">
-            Three forces, eight measures — a strong result for one can hide harm to another.
-            Click a stakeholder to see its components.
+            Each patient is scored separately, so strong care for one never hides
+            harm to the other. Click any row to see the measures underneath it.
           </p>
           <div className="mt-4 space-y-4">
-            {STAKEHOLDERS.map((s) => {
-              const value = totals[s.key];
-              const pct = (Math.min(Math.abs(value), RANGE) / RANGE) * 50;
-              const isOpen = expanded === s.key;
+            {rows.map((row) => {
+              const pct = (Math.min(Math.abs(row.value), RANGE) / RANGE) * 50;
+              const isOpen = expanded === row.key;
               return (
-                <div key={s.key}>
-                  <button className="w-full" onClick={() => setExpanded(isOpen ? null : s.key)}>
+                <div key={row.key}>
+                  <button className="w-full" onClick={() => setExpanded(isOpen ? null : row.key)}>
                     <div className="flex items-baseline justify-between">
                       <span className="font-medium tracking-wide text-[#3A2B26]">
-                        {s.label} {isOpen ? "▴" : "▾"}
+                        {row.label} {isOpen ? "▴" : "▾"}
                       </span>
                       <span className="text-sm text-[#7A6A5E]">
-                        {value > 0 ? `+${value}` : value}
+                        {row.value > 0 ? `+${row.value}` : row.value}
                       </span>
                     </div>
                     <div className="relative mt-1 h-3 rounded-full bg-[#F3E8DA]">
                       <div className="absolute left-1/2 top-0 h-3 w-px bg-[#C9B295]" />
                       <div
                         className={`absolute top-0 h-3 ${
-                          value >= 0 ? "rounded-r-full bg-[#4FA39C]" : "rounded-l-full bg-[#E88C6E]"
+                          row.value >= 0
+                            ? "rounded-r-full bg-[#4FA39C]"
+                            : "rounded-l-full bg-[#E88C6E]"
                         }`}
                         style={
-                          value >= 0
+                          row.value >= 0
                             ? { left: "50%", width: `${pct}%` }
                             : { right: "50%", width: `${pct}%` }
                         }
@@ -942,8 +1066,8 @@ function Results({
                   </button>
                   {isOpen && (
                     <div className="mt-2 space-y-2 rounded-xl bg-[#FBF3E9] p-3">
-                      {metricsFor(s.key).map((m) => {
-                        const v = metrics[m.key];
+                      {metricsFor(row.stakeholder).map((m) => {
+                        const v = row.source[m.key];
                         return (
                           <div key={m.key} className="flex items-baseline justify-between gap-4">
                             <span className="text-sm text-[#3A2B26]">{m.label}</span>
@@ -970,14 +1094,7 @@ function Results({
         <h2 className="text-lg font-semibold text-[#3A2B26]">
           {mode === "timed" ? "Your decisions, explained" : "Your path"}
         </h2>
-        {mode === "timed" && (
-          <p className="mt-1 text-sm text-[#7A6A5E]">
-            You played under the clock, so the full debrief lives here. Open each
-            decision to see what it protected, what it risked, and how the
-            institution responded — including the ones the clock made for you.
-          </p>
-        )}
-        <ol className="mt-3 space-y-2">
+                <ol className="mt-3 space-y-2">
           {path.map((step, i) => {
             const n = nodeById(c, step.nodeId);
             const ch = stepChoice(step);
@@ -1089,25 +1206,15 @@ function Results({
         </blockquote>
       ))}
 
-      <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
-        <h2 className="text-lg font-semibold text-[#3A2B26]">To sit with</h2>
-        <ul className="mt-3 list-disc space-y-2 pl-5 leading-relaxed text-[#3A2B26]">
-          {c.epilogue.reflectionPrompts.map((p, i) => (
-            <li key={i}>{p}</li>
-          ))}
-        </ul>
-      </div>
-
       <ReflectionComposer attemptId={attemptId} />
 
       {c.readingConnections.length > 0 && (
         <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-5">
-          <h2 className="text-lg font-semibold text-[#3A2B26]">Connections to the readings</h2>
-          <ul className="mt-3 space-y-3">
+          <h2 className="text-lg font-semibold text-[#3A2B26]">Inspired by</h2>
+          <ul className="mt-3 space-y-1.5">
             {c.readingConnections.map((r, i) => (
               <li key={i} className="leading-relaxed text-[#5A4A40]">
-                <span className="font-medium text-[#3A2B26]">{r.source}: </span>
-                {r.connection}
+                {r.source}
               </li>
             ))}
           </ul>

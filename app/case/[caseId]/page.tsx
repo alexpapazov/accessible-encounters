@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import CasePlayer from "@/components/CasePlayer";
-import { cases } from "@/lib/data/cases";
+import { cases, publishedCases } from "@/lib/data/cases";
 
 export function generateStaticParams() {
-  return cases.map((c) => ({ caseId: c.id }));
+  return publishedCases.map((c) => ({ caseId: c.id }));
 }
 
 export default async function CasePage({
@@ -13,7 +13,8 @@ export default async function CasePage({
 }) {
   const { caseId } = await params;
   const clinicalCase = cases.find((c) => c.id === caseId);
-  if (!clinicalCase) notFound();
+  // Unpublished cases stay resolvable for history, but aren't playable.
+  if (!clinicalCase || clinicalCase.published === false) notFound();
 
   return <CasePlayer clinicalCase={clinicalCase} />;
 }

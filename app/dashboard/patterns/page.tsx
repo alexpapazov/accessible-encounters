@@ -63,7 +63,7 @@ export default function PatternsPage() {
       <p className="text-sm leading-relaxed text-[#7A6A5E]">
         Based on {analysis.attemptCount} completed encounter
         {analysis.attemptCount === 1 ? "" : "s"}. These describe what your
-        decisions have done — not what kind of clinician you are.
+        decisions have done, not what kind of clinician you are.
       </p>
 
       <section className="mt-6 rounded-2xl border border-[#E7D6C4] bg-white p-5">
@@ -250,7 +250,7 @@ function Bar({ value, range }: { value: number; range: number }) {
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10">
+    <div className="mx-auto max-w-5xl px-6 py-10">
       <h1 className="text-2xl font-semibold text-[#3A2B26]">Patterns and progress</h1>
       <div className="mt-4">{children}</div>
     </div>

@@ -6,6 +6,7 @@ create table public.profiles (
   display_name text,
   role text,             -- optional: medical student / resident / physician / other / general learner
   training_level text,   -- optional free text
+  visual_style text not null default 'basic',  -- see migrations/001; keep in sync with lib/visual-styles.ts
   created_at timestamptz not null default now()
 );
 

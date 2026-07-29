@@ -2,8 +2,14 @@ import type { ClinicalCase } from "../../types";
 import { routineClinicVisit } from "./routine-clinic-visit";
 import { twoPatientsOneClinician } from "./two-patients-one-clinician";
 
-/** Register new cases here — nothing else in the app needs to change. */
+/**
+ * Full registry — includes unpublished cases so historical attempts and
+ * dashboard lookups still resolve. Register new cases here.
+ */
 export const cases: ClinicalCase[] = [twoPatientsOneClinician, routineClinicVisit];
+
+/** What the library shows and what is actually playable. */
+export const publishedCases = cases.filter((c) => c.published !== false);
 
 export const getCase = (id: string): ClinicalCase => {
   const c = cases.find((c) => c.id === id);

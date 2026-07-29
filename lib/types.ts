@@ -125,6 +125,17 @@ export const metricsFor = (s: Stakeholder): MetricInfo[] =>
 /** Per-choice metric changes; include only metrics the choice meaningfully moves. */
 export type Effects = Partial<Record<MetricKey, number>>;
 
+/**
+ * Patient-scoped effects, keyed by patient character id.
+ *
+ * Cases with more than one patient must attribute their PATIENT metrics
+ * (clinical well-being, agency and dignity, trust) here rather than in
+ * `effects`, so each patient is scored on their own. Otherwise treating one
+ * patient well can mathematically cancel out harm to the other, and a death
+ * can be hidden behind a positive total.
+ */
+export type PatientEffects = Record<string, Effects>;
+
 export type MetricState = Record<MetricKey, number>;
 
 export const initialMetrics = (): MetricState => ({
@@ -211,6 +222,14 @@ export interface SceneState {
 export type Condition =
   | { metricAtLeast: [MetricKey, number] }
   | { metricBelow: [MetricKey, number] }
+  /** Totals across a stakeholder's metrics, used to gate worst-case endings. */
+  | { stakeholderAtLeast: [Stakeholder, number] }
+  | { stakeholderBelow: [Stakeholder, number] }
+  /** One named patient's own metric, in multi-patient cases. */
+  | { patientMetricAtLeast: [string, MetricKey, number] }
+  | { patientMetricBelow: [string, MetricKey, number] }
+  /** One named patient's own PATIENT total. */
+  | { patientTotalBelow: [string, number] }
   | { clockAtLeast: number } // scenario minutes
   | { clockBelow: number }
   | { chose: string } // choice id anywhere in path
@@ -241,6 +260,8 @@ export interface DelayedOutcome {
     | { afterScenarioMinutes: number };
   /** Metric changes applied at delivery time, if any. */
   effects?: Effects;
+  /** Multi-patient cases: patient metrics attributed at delivery time. */
+  patientEffects?: PatientEffects;
 }
 
 export interface DecisionFeedback {
@@ -264,7 +285,10 @@ export interface Choice {
   label: string;
   /** Present = this is a dialogue choice: the chosen line is spoken aloud. */
   dialogue?: { speakerId: string };
+  /** Doctor and institution metrics, plus patient metrics in single-patient cases. */
   effects: Effects;
+  /** Multi-patient cases: patient metrics attributed to each patient. */
+  patientEffects?: PatientEffects;
   feedback: DecisionFeedback;
   /** Scenario minutes this action consumes. */
   timeCost?: number;
@@ -286,9 +310,10 @@ export interface DayBreak {
 }
 
 export interface InactionOutcome {
-  /** Narration of what happens when nobody decides — nobody gets helped. */
+  /** Narration of what happens when nobody decides. Nobody gets helped. */
   text: string;
   effects: Effects;
+  patientEffects?: PatientEffects;
   feedback: DecisionFeedback;
   next: NextRule[];
 }
@@ -372,6 +397,11 @@ export interface ClinicalCase {
   setting: string;
   difficulty: "foundational" | "intermediate" | "advanced";
   reviewStatus: ReviewStatus;
+  /**
+   * False = hidden from the library and not playable, but still resolvable so
+   * past attempts keep rendering in history. Defaults to true when omitted.
+   */
+  published?: boolean;
   modes: CaseMode[];
   /** "none" = no metric scoring shown (e.g. cochlear implant case). */
   scoring: "standard" | "none";
@@ -396,6 +426,8 @@ export interface PathStep {
   decisionMs: number;
   scenarioClockAfter: number;
   effectsApplied: Effects;
+  /** Present in multi-patient cases so per-patient scores can be rebuilt from a saved path. */
+  patientEffectsApplied?: PatientEffects;
   /** From the NextRule that fired, when it had a reason. */
   branchReason?: string;
 }

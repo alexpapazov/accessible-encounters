@@ -17,6 +17,9 @@ export const routineClinicVisit: ClinicalCase = {
   setting: "Primary care clinic — headache follow-up appointment",
   difficulty: "foundational",
   reviewStatus: "draft",
+  // Temporarily withdrawn pending a rewrite against design/style-guide.md.
+  // Flip back to true (or delete this line) to re-list it.
+  published: false,
   modes: ["deliberative"],
   scoring: "standard",
   characters: [

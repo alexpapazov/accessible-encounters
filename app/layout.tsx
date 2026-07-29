@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AuthProvider from "@/components/AuthProvider";
 import SiteHeader from "@/components/SiteHeader";
+import VisualStyleProvider from "@/components/VisualStyleProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Accessible clinical encounters",
   description:
-    "Interactive clinical encounters for practicing communication with Deaf and hard-of-hearing patients.",
+    "Interactive clinical encounters about care under pressure, where every decision costs something.",
 };
 
 export default function RootLayout({
@@ -32,11 +33,13 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#FBF5EE]">
         <AuthProvider>
-          <a href="#main" className="skip-link">
-            Skip to content
-          </a>
-          <SiteHeader />
-          <main id="main">{children}</main>
+          <VisualStyleProvider>
+            <a href="#main" className="skip-link">
+              Skip to content
+            </a>
+            <SiteHeader />
+            <main id="main">{children}</main>
+          </VisualStyleProvider>
         </AuthProvider>
       </body>
     </html>

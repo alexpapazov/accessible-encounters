@@ -3,22 +3,44 @@ import type {
   Condition,
   DelayedOutcome,
   Effects,
+  MetricKey,
   MetricState,
   NextRule,
   PathStep,
+  PatientEffects,
 } from "./types";
-import { initialMetrics } from "./types";
+import { STAKEHOLDERS, initialMetrics } from "./types";
+import type { Mood, SceneState, Stakeholder } from "./types";
 
 /** Runtime state the condition system evaluates against. */
 export interface EvalContext {
   metrics: MetricState;
   scenarioClock: number; // minutes
   path: PathStep[];
+  /** Per-patient metrics in multi-patient cases, keyed by patient character id. */
+  patients?: Record<string, MetricState>;
 }
 
 export function evalCondition(c: Condition, ctx: EvalContext): boolean {
   if ("metricAtLeast" in c) return ctx.metrics[c.metricAtLeast[0]] >= c.metricAtLeast[1];
   if ("metricBelow" in c) return ctx.metrics[c.metricBelow[0]] < c.metricBelow[1];
+  if ("stakeholderAtLeast" in c)
+    return stakeholderTotals(ctx.metrics)[c.stakeholderAtLeast[0]] >= c.stakeholderAtLeast[1];
+  if ("stakeholderBelow" in c)
+    return stakeholderTotals(ctx.metrics)[c.stakeholderBelow[0]] < c.stakeholderBelow[1];
+  if ("patientMetricAtLeast" in c) {
+    const [pid, key, n] = c.patientMetricAtLeast;
+    return (ctx.patients?.[pid]?.[key] ?? 0) >= n;
+  }
+  if ("patientMetricBelow" in c) {
+    const [pid, key, n] = c.patientMetricBelow;
+    return (ctx.patients?.[pid]?.[key] ?? 0) < n;
+  }
+  if ("patientTotalBelow" in c) {
+    const [pid, n] = c.patientTotalBelow;
+    const m = ctx.patients?.[pid];
+    return m ? stakeholderTotals(m).patient < n : false;
+  }
   if ("clockAtLeast" in c) return ctx.scenarioClock >= c.clockAtLeast;
   if ("clockBelow" in c) return ctx.scenarioClock < c.clockBelow;
   if ("chose" in c)
@@ -45,6 +67,79 @@ export function resolveNext(rules: NextRule[], ctx: EvalContext): NextRule {
     if (!rule.when || evalCondition(rule.when, ctx)) return rule;
   }
   throw new Error("No next rule matched — case data must end rule lists with an unconditional rule");
+}
+
+/**
+ * No single decision may move a metric by more than this. Authored effects are
+ * written in the 1 to 3 range, but timed mode adds decision-speed and
+ * milestone bonuses on top, which could otherwise stack into numbers that make
+ * one choice look decisive out of all proportion.
+ */
+export const MAX_EFFECT_PER_DECISION = 3;
+
+const clampValue = (v: number) =>
+  Math.max(-MAX_EFFECT_PER_DECISION, Math.min(MAX_EFFECT_PER_DECISION, v));
+
+export function clampEffects(e: Effects): Effects {
+  const out: Effects = {};
+  for (const [k, v] of Object.entries(e)) {
+    if (v) out[k as MetricKey] = clampValue(v);
+  }
+  return out;
+}
+
+export function clampPatientEffects(pe?: PatientEffects): PatientEffects | undefined {
+  if (!pe) return pe;
+  return Object.fromEntries(
+    Object.entries(pe).map(([pid, e]) => [pid, clampEffects(e)])
+  );
+}
+
+/** Patient character ids, in the order the case lists them. */
+export const patientIds = (c: ClinicalCase): string[] =>
+  c.characters.filter((ch) => ch.role === "patient").map((ch) => ch.id);
+
+/** True when PATIENT should be scored and shown per patient. */
+export const isMultiPatient = (c: ClinicalCase): boolean => patientIds(c).length > 1;
+
+export const initialPatientMetrics = (c: ClinicalCase): Record<string, MetricState> =>
+  Object.fromEntries(patientIds(c).map((id) => [id, initialMetrics()]));
+
+export function applyPatientEffects(
+  patients: Record<string, MetricState>,
+  pe: PatientEffects | undefined
+): Record<string, MetricState> {
+  if (!pe) return patients;
+  const next = { ...patients };
+  for (const [pid, eff] of Object.entries(pe)) {
+    next[pid] = applyEffects(next[pid] ?? initialMetrics(), eff);
+  }
+  return next;
+}
+
+/**
+ * Fold patient-scoped effects into one aggregate Effects object, so the
+ * case-wide metric totals stay in sync with the per-patient breakdown.
+ */
+export function mergePatientEffects(base: Effects, pe?: PatientEffects): Effects {
+  if (!pe) return base;
+  const out: Effects = { ...base };
+  for (const eff of Object.values(pe)) {
+    for (const [k, v] of Object.entries(eff)) {
+      if (v) out[k as MetricKey] = (out[k as MetricKey] ?? 0) + v;
+    }
+  }
+  return out;
+}
+
+/** Rebuild per-patient metrics from a saved path (used by the dashboard and review). */
+export function patientMetricsFromPath(
+  c: ClinicalCase,
+  path: PathStep[]
+): Record<string, MetricState> {
+  let patients = initialPatientMetrics(c);
+  for (const step of path) patients = applyPatientEffects(patients, step.patientEffectsApplied);
+  return patients;
 }
 
 export function applyEffects(metrics: MetricState, effects: Effects): MetricState {
@@ -98,11 +193,13 @@ export function replayPrefix(
 ): {
   nodeId: string;
   metrics: MetricState;
+  patients: Record<string, MetricState>;
   clock: number;
   path: PathStep[];
   queue: DelayedOutcome[];
 } {
   let metrics = initialMetrics();
+  let patients = initialPatientMetrics(c);
   let queue: DelayedOutcome[] = [];
   let clock = 0;
   const prefix: PathStep[] = [];
@@ -119,12 +216,14 @@ export function replayPrefix(
     if (due.length) {
       queue = queue.filter((d) => !due.includes(d));
       metrics = due.reduce(
-        (m, d) => (d.effects ? applyEffects(m, d.effects) : m),
+        (m, d) => applyEffects(m, mergePatientEffects(d.effects ?? {}, d.patientEffects)),
         metrics
       );
+      patients = due.reduce((ps, d) => applyPatientEffects(ps, d.patientEffects), patients);
     }
 
     metrics = applyEffects(metrics, step.effectsApplied);
+    patients = applyPatientEffects(patients, step.patientEffectsApplied);
     clock = step.scenarioClockAfter;
 
     const res = step.resolution;
@@ -140,6 +239,7 @@ export function replayPrefix(
   return {
     nodeId: path[Math.min(uptoIndex, path.length - 1)].nodeId,
     metrics,
+    patients,
     clock,
     path: prefix,
     queue,
@@ -157,4 +257,90 @@ export function stakeholderTotals(metrics: MetricState) {
       metrics.personalSustainability,
     institution: metrics.operationalEfficiency + metrics.riskCompliance,
   };
+}
+
+
+export interface ScoreRow {
+  key: string;
+  label: string;
+  stakeholder: Stakeholder;
+  value: number;
+  /** Which metric set the expander should read from. */
+  source: MetricState;
+}
+
+/**
+ * One row per stakeholder, except that a case with more than one patient gets
+ * a PATIENT row per patient. Scoring two patients as a single total lets good
+ * care of one hide serious harm to the other.
+ */
+export function buildScoreRows(
+  c: ClinicalCase,
+  metrics: MetricState,
+  patients: Record<string, MetricState>
+): ScoreRow[] {
+  const rows: ScoreRow[] = [];
+  const multi = isMultiPatient(c);
+
+  if (multi) {
+    for (const pid of patientIds(c)) {
+      const m = patients[pid] ?? initialMetrics();
+      rows.push({
+        key: `patient:${pid}`,
+        label: `PATIENT: ${characterById(c, pid).name}`,
+        stakeholder: "patient",
+        value: stakeholderTotals(m).patient,
+        source: m,
+      });
+    }
+  } else {
+    rows.push({
+      key: "patient",
+      label: "PATIENT",
+      stakeholder: "patient",
+      value: stakeholderTotals(metrics).patient,
+      source: metrics,
+    });
+  }
+
+  for (const s of STAKEHOLDERS.filter((s) => s.key !== "patient")) {
+    rows.push({
+      key: s.key,
+      label: s.label,
+      stakeholder: s.key,
+      value: stakeholderTotals(metrics)[s.key],
+      source: metrics,
+    });
+  }
+  return rows;
+}
+
+
+/**
+ * Patients are drawn with the mood the case author set for the beat, but a
+ * patient who is deteriorating must never be drawn looking relieved or
+ * engaged. This overrides the authored mood using the patient's own clinical
+ * well-being, so the picture cannot contradict the outcome.
+ */
+export function adjustSceneMoods(
+  c: ClinicalCase,
+  scene: SceneState,
+  patients: Record<string, MetricState>,
+  metrics: MetricState
+): SceneState {
+  const moods: Record<string, Mood> = { ...(scene.moods ?? {}) };
+  const multi = isMultiPatient(c);
+
+  for (const pid of patientIds(c)) {
+    const authored = moods[pid];
+    if (!authored) continue;
+    const wellbeing = multi
+      ? (patients[pid]?.clinicalWellbeing ?? 0)
+      : metrics.clinicalWellbeing;
+
+    if (wellbeing <= -4) moods[pid] = "exhausted";
+    else if (wellbeing <= -1 && (authored === "relieved" || authored === "engaged"))
+      moods[pid] = "uncertain";
+  }
+  return { ...scene, moods };
 }

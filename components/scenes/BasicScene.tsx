@@ -3,11 +3,12 @@
 import type { Character, Mood, SceneState, TimeOfDay } from "@/lib/types";
 
 /**
- * Scene renderer v2 — warm flat-illustration style.
+ * "Basic" visual style — warm flat illustration. The original look, and a
+ * permanent option in settings however many styles get added later.
  *
  * Renderer-agnostic contract: everything here is driven by SceneState (plus
- * day/time and the scenario clock). Future graphics options implement the
- * same inputs; this component remains available as a settings choice.
+ * day/time and the scenario clock), so alternative styles can render the same
+ * scenes without any engine change.
  *
  * Representation rule: signing is never depicted. Signed communication is
  * conveyed through framing, presence, and expression; speech bubbles carry
@@ -247,36 +248,38 @@ function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Moo
         <rect x="-52" y="194" width="20" height="26" rx="9" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
       </g>
       {/* patient sitting up: upright torso and head, fully frontal */}
-      <rect x="-46" y="212" width="26" height="40" rx="10" fill="#D8E4E8" />
-      <rect x="-38" y="204" width="10" height="12" rx="4" fill={skin} />
-      <circle cx="-33" cy="194" r="13" fill={skin} />
-      {/* hair: top arc plus side panels framing the face to the jaw */}
+      <rect x="-49" y="211" width="32" height="42" rx="12" fill="#D8E4E8" />
+      {/* shoulder: a sloped cap, so the arm leaves the body without bulging */}
       <path
-        d="M-46 194 Q-47 180 -33 179 Q-19 180 -20 194 L-20 187 Q-20 183 -33 183 Q-46 183 -46 187 Z"
+        d="M-49 232 Q-50 219 -40 216 L-36 224 Q-44 227 -44 234 Z"
+        fill="#C9DAE2"
+      />
+      <rect x="-38" y="203" width="10" height="13" rx="4" fill={skin} />
+      <circle cx="-33" cy="194" r="14" fill={skin} />
+      {/* one continuous band of hair, over the crown and down to the jaw */}
+      <path
+        d="M-48 209 C-50 194 -46 177 -33 177 C-20 177 -16 194 -18 209
+           L-23 209 C-21 196 -24 186 -33 186 C-42 186 -45 196 -43 209 Z"
         fill={hair}
       />
-      <path d="M-46 191 Q-48 202 -44 209 L-42 196 Z" fill={hair} />
-      <path d="M-20 191 Q-18 202 -22 209 L-24 196 Z" fill={hair} />
-      <g transform="scale(0.85) translate(-5.8 28.7)">
-        <Face hx={-33} hy={196} mood={mood} skin={skin} />
+      {/* Face is drawn around its own origin, then placed inside the head. */}
+      <g transform="translate(-33 196) scale(0.62)">
+        <Face hx={0} hy={0} mood={mood} skin={skin} />
       </g>
       {/* blanket over the lap, with knee mound and foot bump */}
       <ellipse cx="18" cy="238" rx="15" ry="7" fill="#BFD3DC" />
       <rect x="-30" y="236" width="90" height="17" rx="8" fill="#BFD3DC" />
       <ellipse cx="52" cy="240" rx="8" ry="5" fill="#BFD3DC" />
       <line x1="-26" y1="248" x2="56" y2="248" stroke="#A8BEC8" strokeWidth="1.5" />
-      {/* arm resting on the blanket, outlined so it reads against the covers */}
-      <rect
-        x="-42"
-        y="230"
-        width="34"
-        height="10"
-        rx="5"
-        fill="#D8E4E8"
-        stroke="#9AB2BE"
-        strokeWidth="1.5"
+      {/* arm running from the shoulder across the lap, in a darker sleeve tone */}
+      <path
+        d="M-46 229 Q-47 237 -36 238 L-12 238"
+        stroke="#C9DAE2"
+        strokeWidth="10"
+        fill="none"
+        strokeLinecap="round"
       />
-      <circle cx="-4" cy="235" r="5" fill={skin} stroke="#C79B72" strokeWidth="1" />
+      <circle cx="-8" cy="238" r="5.5" fill={skin} />
     </g>
   );
 }
@@ -318,7 +321,12 @@ function Bubble({ x, y, text }: { x: number; y: number; text: string }) {
 
 /* ---------------- scene ---------------- */
 
-export default function Scene({ scene, characters, timeOfDay = "afternoon", scenarioMinutes }: Props) {
+export default function BasicScene({
+  scene,
+  characters,
+  timeOfDay = "afternoon",
+  scenarioMinutes,
+}: Props) {
   const pal = PALETTES[timeOfDay];
   const isNight = timeOfDay === "night";
   const charById = new Map(characters.map((c) => [c.id, c]));
