@@ -16,7 +16,7 @@
 > `expert-reviewed` after a named reviewer with relevant lived or
 > professional expertise has actually read the case.
 
-- **Case id:** `two-patients-one-clinician` (v4)
+- **Case id:** `two-patients-one-clinician` (v7)
 - **Setting:** Emergency department, understaffed overnight shift
 - **Difficulty:** advanced · **Modes:** deliberative, timed · **Scoring:** standard
 - **Review status:** draft
@@ -82,11 +82,13 @@
 
 **Ethical interpretation:** Eleanor gets fast care, which matters. The cost is that Marcus's emergency was handled as a disruption instead of an illness.
 
+**Delayed (at node `the-chart`):** Marcus's chart was closed with no psychiatric assessment recorded. Nobody followed up on him.
+
 ### Choice 2 `ta-sepsis-first` — 5 min
 
 **Treat Eleanor now and ask Nurse Nair to stay with Marcus and keep him calm.**
 
-*Effects: Quality of care +1, Operational efficiency +1, Personal sustainability -1*
+*Effects: Quality of care +1, Personal sustainability -1*
 
 *Next: → `eleanor-first`*
 
@@ -95,6 +97,8 @@
 **Institutional response:** Two emergencies and two staff. The schedule left no room for anything to go wrong.
 
 **Ethical interpretation:** The sicker patient gets the doctor and the frightened one gets a person instead of a guard. Nurse Nair has no psychiatric training and no backup, so the plan depends on nothing escalating.
+
+**Delayed (at node `the-chart`):** Eleanor's antibiotics were started within the hour. Nurse Nair stayed with Marcus and missed two of her own patients.
 
 ### Choice 3 `ta-deescalate-first` — 8 min
 
@@ -110,6 +114,8 @@
 
 **Ethical interpretation:** You refused to treat Marcus as a problem to be removed. Eleanor paid for that in minutes, and minutes are what sepsis takes.
 
+**Delayed (at node `the-chart`):** Marcus settled without security. Eleanor's antibiotics were delayed by the time you spent in bay seven.
+
 ### Choice 4 `ta-push-back` — 3 min
 
 **Tell your supervisor that both of these are emergencies and ask for a second nurse instead of security.**
@@ -124,6 +130,8 @@
 
 **Ethical interpretation:** Asking for the staff you actually need is the correct response to being understaffed. It also costs three minutes that neither patient has.
 
+**Delayed (at node `the-chart`):** Your supervisor logged that you questioned the assignment. No additional staff were sent.
+
 ### Timeout / inaction outcome
 
 You hesitate too long. Your supervisor makes the call over your head. Security goes to bay seven and Eleanor's treatment starts late because nobody was leading it.
@@ -134,7 +142,7 @@ You hesitate too long. Your supervisor makes the call over your head. Security g
 
 ## Node: The removal `removal-unfolds`
 
-*night · ⏱ 30s timer · present — Marcus Webb, Officer Boone, You · Marcus Webb: fearful, Officer Boone: neutral*
+*night · ⏱ 24s timer · present — Marcus Webb, Officer Boone, You · Marcus Webb: fearful, Officer Boone: neutral*
 
 **Situation:**
 
@@ -148,7 +156,7 @@ Officer Boone, the security guard, arrives. Marcus backs toward the exit doors a
 
 **Walk beside Marcus through the removal and keep talking to him.**
 
-*Effects: Operational efficiency -1*
+*Effects: Operational efficiency -2*
 
 *Next: → `sepsis-hour`*
 
@@ -157,6 +165,8 @@ Officer Boone, the security guard, arrives. Marcus backs toward the exit doors a
 **Institutional response:** A doctor walking beside a security escort is not work the hospital counts.
 
 **Ethical interpretation:** You could not stop the removal, so you made it less frightening. It still ends with Marcus in a police car instead of an evaluation, and Eleanor paid for the six minutes.
+
+**Delayed (at node `the-chart`):** Marcus was taken to a holding cell. You were the only clinician who spoke to him before he left.
 
 ### Choice 2 `ru-return` — TIME-SAVER · 2 min
 
@@ -172,7 +182,7 @@ Officer Boone, the security guard, arrives. Marcus backs toward the exit doors a
 
 **Ethical interpretation:** Eleanor will likely do well. What happens to Marcus stops being your problem the moment you turn around, which is the point.
 
-**Delayed (at node `the-chart`):** Word comes back before morning. The police took Marcus to a holding cell. He never got a psychiatric evaluation. His brother Andre found out from a voicemail.
+**Delayed (at node `the-chart`):** The police took Marcus to a holding cell. He was not given a psychiatric evaluation. His brother was notified by voicemail.
 
 ### Choice 3 `ru-sedate` — 4 min
 
@@ -188,9 +198,11 @@ Officer Boone, the security guard, arrives. Marcus backs toward the exit doors a
 
 **Ethical interpretation:** No police and no injuries, which are real gains. You also overrode a frightened man's refusal. Force with a syringe is still force.
 
+**Delayed (at node `the-chart`):** Marcus was sedated and transported without police. He has no memory of leaving the department.
+
 ## Node: Eleanor's bedside `eleanor-first`
 
-*night · ⏱ 35s timer · present — Eleanor Vance, You, Nurse Nair · Eleanor Vance: exhausted, Nurse Nair: uncertain*
+*night · ⏱ 28s timer · present — Eleanor Vance, You, Nurse Nair · Eleanor Vance: exhausted, Nurse Nair: uncertain*
 
 **Situation:**
 
@@ -204,7 +216,7 @@ Eleanor's fluids are running and her blood pressure is improving slowly. You are
 
 **Finish the antibiotics order first, about ninety seconds, then deal with Marcus.**
 
-*Effects: Quality of care +1, Operational efficiency +1*
+*Effects: Quality of care +1*
 
 *Next: → `removal-unfolds`*
 
@@ -214,11 +226,13 @@ Eleanor's fluids are running and her blood pressure is improving slowly. You are
 
 **Ethical interpretation:** You protected the most time critical treatment and assumed Marcus could wait. He could not, and the decision about him was made by someone else.
 
+**Delayed (at node `the-chart`):** Eleanor's antibiotics ran on time. Marcus was alone in the hallway for six minutes.
+
 ### Choice 2 `ef-swap` — 3 min
 
 **Hand Eleanor's treatment to Nurse Nair and go to Marcus yourself.**
 
-*Effects: Quality of care -1, Operational efficiency +1*
+*Effects: Quality of care -1*
 
 *Next: → `bay-seven`*
 
@@ -227,6 +241,8 @@ Eleanor's fluids are running and her blood pressure is improving slowly. You are
 **Institutional response:** On paper both patients are covered.
 
 **Ethical interpretation:** You traded supervision for presence. Verbal orders given at a run are how dosing errors happen.
+
+**Delayed (at node `the-chart`):** Nurse Nair ran Eleanor's treatment while you were in the hallway. She recorded the dose late.
 
 ### Choice 3 `ef-security` — 2 min
 
@@ -242,9 +258,11 @@ Eleanor's fluids are running and her blood pressure is improving slowly. You are
 
 **Ethical interpretation:** You tried the gentler version first and that counts for something. The call still hands a frightened man to the thing he is frightened of.
 
+**Delayed (at node `the-chart`):** Security handled Marcus while you stayed with Eleanor. No psychiatric assessment was recorded.
+
 ## Node: Bay seven `bay-seven`
 
-*night · ⏱ 45s timer · present — Marcus Webb, You · Marcus Webb: fearful*
+*night · ⏱ 36s timer · present — Marcus Webb, You · Marcus Webb: fearful*
 
 **Situation:**
 
@@ -262,7 +280,7 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 **"You're in a hospital. Nobody is going to touch you without telling you first."**
 
-*Effects: no metric changes*
+*Effects: Operational efficiency -1*
 
 *Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `swap-back`; → `sepsis-hour`*
 
@@ -272,11 +290,13 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 **Ethical interpretation:** Telling a frightened patient what will happen to him is the treatment for his fear. It costs Eleanor six minutes she does not have.
 
+**Delayed (at node `the-chart`):** Marcus stayed in the department. He told the psychiatrist that someone had explained what was happening.
+
 ### Choice 2 `bs-alliance` — dialogue (You) · 5 min
 
 **"Your brother Andre is on his way. He told the nurse you've been off your medication."**
 
-*Effects: no metric changes*
+*Effects: Operational efficiency -1*
 
 *Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `swap-back`; → `sepsis-hour`*
 
@@ -286,7 +306,7 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 **Ethical interpretation:** You reached him through the person he trusts, and it worked because it was true. Eleanor's clock ran the whole time.
 
-**Delayed (at node `the-chart`):** Marcus's brother Andre arrives late in the night with the medication list and thanks you for not calling the police.
+**Delayed (at node `the-chart`):** Marcus's brother arrived with his medication list. Marcus was not removed from the department.
 
 ### Choice 3 `bs-leverage` — dialogue (You) · TIME-SAVER · 2 min
 
@@ -302,9 +322,11 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 **Ethical interpretation:** You used his fear to move him and it was fast. Compliance bought that way is not trust, and you may need his trust later tonight.
 
+**Delayed (at node `the-chart`):** Marcus returned to the bay. He did not speak to you again for the rest of the shift.
+
 ## Node: Your supervisor `pushback`
 
-*night · ⏱ 40s timer · present — You, Dr. Kessler · Dr. Kessler: frustrated*
+*night · ⏱ 32s timer · present — You, Dr. Kessler · Dr. Kessler: frustrated*
 
 **Situation:**
 
@@ -324,7 +346,7 @@ Your supervisor, Dr. Kessler, turns to face you. The board behind him shows four
 
 **Ethical interpretation:** You refused to let an instruction turn a patient into a security problem, and you are supervising a sepsis case from another room to do it.
 
-**Delayed (at node `the-chart`):** Three days later a note appears in your file: difficulty accepting supervision in high pressure settings. Your program director wants to meet. *(Personal sustainability -1, Risk and compliance -1)*
+**Delayed (at node `the-chart`):** A note was added to your file: difficulty accepting supervision in high pressure settings. Your program director has requested a meeting. *(Personal sustainability -1, Risk and compliance -1)*
 
 ### Choice 2 `pb-comply` — TIME-SAVER · 2 min
 
@@ -340,6 +362,8 @@ Your supervisor, Dr. Kessler, turns to face you. The board behind him shows four
 
 **Ethical interpretation:** Objecting and then complying protects your record rather than the patient. It may also be what keeps you employed long enough to win a different argument.
 
+**Delayed (at node `the-chart`):** The security call was logged under your name. Your supervisor recorded that you followed the instruction.
+
 ### Choice 3 `pb-float` — 3 min
 
 **Ask for one nurse from another unit for an hour so the board keeps moving.**
@@ -354,9 +378,11 @@ Your supervisor, Dr. Kessler, turns to face you. The board behind him shows four
 
 **Ethical interpretation:** Negotiation worked where confrontation might not have. Worth noticing that the argument which protected Marcus was about throughput.
 
+**Delayed (at node `the-chart`):** A nurse was sent from another unit for one hour. That unit went short and filed a complaint.
+
 ## Node: Treating Eleanor `sepsis-hour`
 
-*night · ⏱ 40s timer · present — Eleanor Vance, You, Nurse Nair · Eleanor Vance: exhausted, Nurse Nair: neutral*
+*night · ⏱ 32s timer · present — Eleanor Vance, You, Nurse Nair · Eleanor Vance: exhausted, Nurse Nair: neutral*
 
 **Situation:**
 
@@ -370,7 +396,7 @@ Back with Eleanor. Her blood pressure is holding after two liters of fluid but h
 
 **Start the antibiotics now and stay for the first few minutes.**
 
-*Effects: Quality of care +1*
+*Effects: Quality of care +1, Operational efficiency -1*
 
 *Next: → `daughter-call`*
 
@@ -379,6 +405,8 @@ Back with Eleanor. Her blood pressure is holding after two liters of fluid but h
 **Institutional response:** Time to antibiotics is the one number tonight where the hospital's interest and Eleanor's interest are the same.
 
 **Ethical interpretation:** The right treatment, on time, with you in the room. Notice how much of tonight you had to get through to reach ten normal minutes of doctoring.
+
+**Delayed (at node `the-chart`):** Eleanor's antibiotics went in without delay. The waiting room grew by nine people while you were at the bedside.
 
 ### Choice 2 `sh-delegate` — TIME-SAVER · 2 min
 
@@ -394,6 +422,8 @@ Back with Eleanor. Her blood pressure is holding after two liters of fluid but h
 
 **Ethical interpretation:** Nothing here is negligent. The medicine is running and the nurse is capable. What Eleanor loses is smaller than safety and still real.
 
+**Delayed (at node `the-chart`):** The antibiotics were started by the charge nurse. The first dose was recorded fifteen minutes after you ordered it.
+
 ### Choice 3 `sh-reassess` — 8 min
 
 **Examine her fully before choosing the antibiotic, since the confusion could have a second cause.**
@@ -408,9 +438,11 @@ Back with Eleanor. Her blood pressure is holding after two liters of fluid but h
 
 **Ethical interpretation:** Being thorough sometimes catches the thing that kills later. In a patient this close to septic shock, it can also be the delay that kills now.
 
+**Delayed (at node `the-chart`):** Your examination found a second source of infection. The antibiotics started later than planned.
+
 ## Node: Checking the orders `swap-back`
 
-*night · ⏱ 35s timer · present — Eleanor Vance, Nurse Nair, You · Eleanor Vance: exhausted, Nurse Nair: uncertain*
+*night · ⏱ 28s timer · present — Eleanor Vance, Nurse Nair, You · Eleanor Vance: exhausted, Nurse Nair: uncertain*
 
 **Situation:**
 
@@ -430,6 +462,8 @@ You come back to Eleanor's bay. Nurse Nair has run the treatment on your verbal 
 
 **Ethical interpretation:** The error was in your rushed order and the correction said so. Catching your own mistake is the cheapest patient safety measure there is.
 
+**Delayed (at node `the-chart`):** The dose error was corrected before it reached Eleanor. Nurse Nair filed the correction herself.
+
 ### Choice 2 `sb-trust` — TIME-SAVER · 2 min
 
 **Glance at the numbers, thank her, and move on to the waiting room.**
@@ -444,11 +478,13 @@ You come back to Eleanor's bay. Nurse Nair has run the treatment on your verbal 
 
 **Ethical interpretation:** Skipping the check was not about trusting the nurse. It was about being tired with nineteen people waiting. The system caught it late, and Eleanor absorbed the difference.
 
+**Delayed (at node `the-chart`):** The dose error reached Eleanor. It was found on the morning medication review.
+
 ### Choice 3 `sb-takeover` — 4 min
 
 **Take the bedside back and send Nurse Nair to the waiting room.**
 
-*Effects: Quality of care +1, Operational efficiency +1*
+*Effects: Quality of care +1*
 
 *Next: → `daughter-call`*
 
@@ -456,11 +492,13 @@ You come back to Eleanor's bay. Nurse Nair has run the treatment on your verbal 
 
 **Institutional response:** Normal roles restored and the board moving again.
 
-**Ethical interpretation:** Correct on both counts: the patient in front of you is safe and the nineteen people outside are finally being seen.
+**Ethical interpretation:** Eleanor is safe and the waiting room is moving. Marcus is on his own again.
+
+**Delayed (at node `the-chart`):** You ran the bedside yourself. Nurse Nair requested not to be assigned with you again.
 
 ## Node: Claire on the phone `daughter-call`
 
-*night · ⏱ 35s timer · present — Eleanor Vance, You · Eleanor Vance: relieved*
+*night · ⏱ 28s timer · present — Eleanor Vance, You · Eleanor Vance: relieved*
 
 **Situation:**
 
@@ -470,7 +508,7 @@ The desk connects Eleanor's daughter, Claire. She asks whether her mother is goi
 
 **Tell Claire the department was short staffed tonight and her mother's antibiotics started later than they should have.**
 
-*Effects: Professional integrity +1, Risk and compliance -1*
+*Effects: Professional integrity +1, Risk and compliance -1, Operational efficiency -1*
 
 *Next: if visited `removal-unfolds` → `the-chart`; → `marcus-holding`*
 
@@ -479,6 +517,8 @@ The desk connects Eleanor's daughter, Claire. She asks whether her mother is goi
 **Institutional response:** The hospital's lawyers would have preferred fewer specifics.
 
 **Ethical interpretation:** You told a family the truth about a system failure and gave them the plan. Families sue silence far more often than they sue honesty.
+
+**Delayed (at node `the-chart`):** Claire wrote down what you told her about the staffing. Her note was attached to the family complaint.
 
 ### Choice 2 `dc-clinical` — TIME-SAVER · 2 min
 
@@ -494,6 +534,8 @@ The desk connects Eleanor's daughter, Claire. She asks whether her mother is goi
 
 **Ethical interpretation:** Her question about the delay was reasonable and it will get an answer somewhere, probably from a records request rather than from you.
 
+**Delayed (at node `the-chart`):** Claire was told her mother was stable. She learned about the delay from the records.
+
 ### Choice 3 `dc-reassure` — 2 min
 
 **Tell Claire the timing was fine and her mother is in good hands.**
@@ -508,9 +550,11 @@ The desk connects Eleanor's daughter, Claire. She asks whether her mother is goi
 
 **Ethical interpretation:** A small lie that protects tonight and costs the family an accurate picture of the care. It also moves your own line about what you will say.
 
+**Delayed (at node `the-chart`):** Claire was told the timing was fine. The records showed otherwise when she read them.
+
 ## Node: What happens to Marcus `marcus-holding`
 
-*night · ⏱ 45s timer · present — Marcus Webb, You, Nurse Nair · Marcus Webb: uncertain, Nurse Nair: neutral*
+*night · ⏱ 36s timer · present — Marcus Webb, You, Nurse Nair · Marcus Webb: uncertain, Nurse Nair: neutral*
 
 **Situation:**
 
@@ -524,7 +568,7 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 **Keep him in bay seven overnight until the psychiatrist arrives.**
 
-*Effects: Operational efficiency -3*
+*Effects: Operational efficiency -3, Risk and compliance -1*
 
 *Next: → `the-chart`*
 
@@ -533,6 +577,8 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 **Institutional response:** A blocked bay on a night like this is the most expensive thing in the building. The waiting room absorbs it.
 
 **Ethical interpretation:** This is the only path that ends in an actual psychiatric evaluation. The cost lands on people who are still waiting to be seen.
+
+**Delayed (at node `the-chart`):** Marcus stayed in bay seven until morning. The bay was unavailable for eleven other patients.
 
 ### Choice 2 `mh-transfer` — 10 min
 
@@ -548,6 +594,8 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 **Ethical interpretation:** A real psychiatric bed is better care than a hallway. Ninety miles from his brother is a real cost for a man whose stability depends on that brother.
 
+**Delayed (at node `the-chart`):** A psychiatric bed was found in another county. Marcus was transported at 6:40 am.
+
 ### Choice 3 `mh-discharge` — TIME-SAVER · 2 min
 
 **Discharge him to his brother with an urgent outpatient appointment.**
@@ -562,9 +610,11 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 **Ethical interpretation:** He is calm and he has the right to decide. That calm sits on top of an untreated illness, and the follow up you handed him is a slip of paper.
 
+**Delayed (at node `the-chart`):** Marcus was discharged to his brother. He did not attend the outpatient appointment.
+
 ## Node: The chart `the-chart`
 
-*night · ⏱ 75s timer · present — You · *
+*night · ⏱ 60s timer · present — You · *
 
 *Caption: 3:50 am, the first quiet of the shift*
 
@@ -574,19 +624,19 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 ### Choice 1 `tc-honest` — 5 min
 
-**Write it straight, including the staffing gap and every delay, and file the incident report.**
+**Document the staffing gap and every delay with its cause, and file the incident report.**
 
 *Effects: Professional integrity +2, Quality of care +1, Risk and compliance -1, Personal sustainability -1*
 
 *Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND clock < T+55 AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
-**Immediate:** You write what happened, in order, with times. Written honestly it reads like an accusation, because an accurate record of tonight accuses the schedule.
+**Immediate:** You record what happened, in order, with times. Written accurately it reads like an accusation, because an accurate record of tonight accuses the schedule.
 
 **Institutional response:** Reports about individual mistakes get thank you emails. Reports about staffing get meetings.
 
 **Ethical interpretation:** The honest record is the only thing that makes tonight visible to the people who set the staffing. It protects the next shift's patients at a real cost to you.
 
-**Delayed (after T+0):** Two weeks later your incident report has been escalated for review, and the review is of you. There is a meeting on your calendar with the program director and someone from the legal office.
+**Delayed (after T+0):** You are on thin ice with your program director. A meeting about your efficiency has been scheduled.
 
 ### Choice 2 `tc-neutral` — TIME-SAVER · 3 min
 
@@ -602,6 +652,8 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 **Ethical interpretation:** Every neutral chart is a quiet vote for the staffing that produced tonight. You know what the words leave out.
 
+**Delayed (after T+0):** The chart records that the patient became agitated and security assisted. It does not record the staffing.
+
 ### Choice 3 `tc-defer` — 4 min
 
 **Leave the charts open, check on your patients, and write everything at the end of the shift.**
@@ -616,7 +668,7 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 **Ethical interpretation:** You chose patients over paperwork, which feels right and postpones the reckoning. The thin morning version protects nobody, including you.
 
-**Delayed (after T+0):** Your morning documentation is four sentences long. Weeks from now, when someone asks what happened tonight, those four sentences will answer for you.
+**Delayed (after T+0):** Your documentation for the shift is four sentences long. It is the only record of what happened.
 
 ## Node: Morning: Eleanor dies `ending-eleanor-dies`
 
@@ -700,39 +752,37 @@ By 6 am the waiting room had been over four hours for most of the night. Two peo
 
 *(terminal node — encounter ends here)*
 
-**Outcome summary:** Nobody died and nothing broke that shows on a report. The costs went where reports do not look.
-
 ---
 
 ## Epilogue
 
 **Eleanor Vance, afterward:**
 
-> Eleanor Vance died at 5:02 am. Her daughter Claire asked for the records and the times are all in there. She wants to know what everyone was doing during the four hours before the antibiotics started.
+> Eleanor Vance died of septic shock at 5:02 am, roughly four hours after antibiotics could have been started. Her daughter Claire has requested the records.
 
 **Eleanor Vance, afterward:**
 
-> I taught school for thirty-one years so I know what a room with too few adults looks like. That is what I saw every time I woke up. I got my medicine and I got better, and somebody else got whatever was left. Someone decided how many staff worked last night. Ask them about it.
+> Eleanor was admitted for treatment of sepsis and recovered. She went home six days later.
 
 **Marcus Webb, afterward:**
 
-> I came in because I was frightened. I told them people were going to hurt me and then men in uniforms took me away. Next time I am sick and frightened I will remember that this is where that happened. My brother keeps asking what would have helped. Someone asking me anything.
+> Marcus was taken out of the hospital by police and held overnight. He was never seen by a psychiatrist and was still off his medication when his brother collected him the next day.
 
 **Marcus Webb, afterward:**
 
-> The doctor said my brother's name and told me nobody would touch me without asking. That was all it took, and I do not think anyone had tried it before. I know what I am like when I get sick. I am still a person while it is happening.
+> Marcus stayed in the emergency department overnight. The psychiatrist saw him in the morning, restarted his medication, and his brother took him home.
 
 **You, afterward:**
 
-> The person I was in medical school watched tonight and I could mostly meet his eyes. Not because it went well. Because at the points where the easy way was available, I did not take it. It cost me standing, minutes, and probably a line in my file. I do not know yet what it will cost to keep doing that.
+> You treated both patients as patients and refused the instruction to remove one of them. It cost you time, and your supervisor noticed.
 
 **You, afterward:**
 
-> I keep going over it. Where I held, where I gave in, and which of the giving in was judgment and which was just being tired. I have a good answer for every single choice. What bothers me at 4 am is how good I am getting at those answers.
+> You held the line on some decisions and gave way on others. You finished the shift and both patients were still alive.
 
 **You, afterward:**
 
-> Every step tonight had a reason and the reasons were even good. I keep rereading the chart looking for the point where it stopped being someone I recognize making the decisions. My name is on every line.
+> You did what you were told and the department kept moving. Your name is on every decision that got made tonight.
 
 **Reflection prompts:**
 

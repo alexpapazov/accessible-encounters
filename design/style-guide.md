@@ -162,6 +162,14 @@ clinician" (8 Word comments + chat notes).
     and relationship -1".
 27h. **Rule 1 covers interface text.** The dashes in headings and buttons are
     held to the same standard as case prose.
+27i. **Epilogue conditions cannot use `visited` on an ending node.** The engine
+    records a path step when a node is *left*, so the terminal node the player
+    lands on is never in the path and any such condition silently never fires.
+    Key epilogue text off the same conditions the ending routing uses, and
+    verify that each ending maps to exactly one reflection per character.
+27j. **No metric effects on delayed outcomes delivered at an ending.** Routing
+    resolves before those land, so an effect there can make the epilogue
+    disagree with the ending the player was given.
 28. **Reading connections are a plain "Inspired by" list in the app.** Titles
     only, no explanation of the link. The longer connection notes stay in the
     review exports for the author and reviewers.

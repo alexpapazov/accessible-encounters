@@ -1,12 +1,17 @@
 import type { ClinicalCase } from "../../types";
 import { routineClinicVisit } from "./routine-clinic-visit";
 import { twoPatientsOneClinician } from "./two-patients-one-clinician";
+import { whenEveryoneSaysKeepFighting } from "./when-everyone-says-keep-fighting";
 
 /**
  * Full registry — includes unpublished cases so historical attempts and
  * dashboard lookups still resolve. Register new cases here.
  */
-export const cases: ClinicalCase[] = [twoPatientsOneClinician, routineClinicVisit];
+export const cases: ClinicalCase[] = [
+  twoPatientsOneClinician,
+  whenEveryoneSaysKeepFighting,
+  routineClinicVisit,
+];
 
 /** What the library shows and what is actually playable. */
 export const publishedCases = cases.filter((c) => c.published !== false);

@@ -529,7 +529,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
         </Link>
         <h1 className="mt-1 text-2xl font-semibold text-[#3A2B26]">{c.title}</h1>
         <p className="mt-1 text-sm text-[#7A6A5E]">{c.setting}</p>
-        <p className="mt-4 leading-relaxed text-[#3A2B26]">How do you want to face this shift?</p>
+        <p className="mt-4 leading-relaxed text-[#3A2B26]">How do you want to play this encounter?</p>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <button
             onClick={() => setMode("deliberative")}
