@@ -1,4 +1,4 @@
-# Accessible Clinical Encounters — case review packet
+# Empathetic Encounters — case review packet
 
 Each file below is the complete text of one clinical case: every situation,
 every choice, every consequence, in reading order. Reviewer guidance is at

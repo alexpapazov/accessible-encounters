@@ -260,21 +260,16 @@ function GurneyPatient({ mood, male = false }: { mood: Mood; male?: boolean }) {
       <rect x="-38" y="203" width="10" height="13" rx="4" fill={skin} />
       <circle cx="-33" cy="194" r="14" fill={skin} />
       {male ? (
-        <>
-          {/* short cap with sideburns, kept clear of the brows at y 191 */}
-          <path
-            d="M-46 194 C-49 184 -45 172 -33 172 C-21 172 -17 184 -20 194
-               L-24 194 C-23 187 -26 183 -33 183 C-40 183 -43 187 -42 194 Z"
-            fill={hair}
-          />
-          {/* short beard along the jaw, below the mouth line at y 200 */}
-          <path
-            d="M-45 198 C-44 207 -39 211 -33 211 C-27 211 -22 207 -21 198
-               C-24 204 -42 204 -45 198 Z"
-            fill={hair}
-            fillOpacity={0.9}
-          />
-        </>
+        /*
+         * Short cap only. The brows sit at y 191 and the eyes at y 196, so the
+         * hairline stops at 188 at the temples and 184 across the forehead:
+         * nothing on the face is ever covered.
+         */
+        <path
+          d="M-47 188 C-47 176 -40 171 -33 171 C-26 171 -19 176 -19 188
+             C-27 183 -39 183 -47 188 Z"
+          fill={hair}
+        />
       ) : (
         /* one continuous band of hair, over the crown and down to the jaw */
         <path
@@ -287,8 +282,7 @@ function GurneyPatient({ mood, male = false }: { mood: Mood; male?: boolean }) {
       <g transform="translate(-33 196) scale(0.62)">
         <Face hx={0} hy={0} mood={mood} skin={skin} />
       </g>
-      {/* blanket over the lap, with knee mound and foot bump */}
-      <ellipse cx="18" cy="238" rx="15" ry="7" fill={blanket} />
+      {/* blanket over the lap, flat, with a foot bump at the far end */}
       <rect x="-30" y="236" width="90" height="17" rx="8" fill={blanket} />
       <ellipse cx="52" cy="240" rx="8" ry="5" fill={blanket} />
       <line x1="-26" y1="248" x2="56" y2="248" stroke={blanketLine} strokeWidth="1.5" />

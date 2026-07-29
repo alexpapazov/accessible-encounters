@@ -1,5 +1,5 @@
 /**
- * Engine v2 — core data model for Accessible Clinical Encounters.
+ * Engine v2 — core data model for Empathetic Encounters.
  *
  * Central question: what does ethical care require when time, staffing,
  * institutional pressure, uncertainty, and personal risk make every available

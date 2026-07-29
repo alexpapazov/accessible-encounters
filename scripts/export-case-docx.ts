@@ -213,7 +213,7 @@ function buildDoc(c: ClinicalCase) {
   }
 
   return new Document({
-    creator: "Accessible Clinical Encounters",
+    creator: "Empathetic Encounters",
     title: `${c.title} — review copy`,
     styles: {
       default: {

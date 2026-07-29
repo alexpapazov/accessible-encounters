@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accessible clinical encounters",
+  title: "Empathetic Encounters",
   description:
     "Interactive clinical encounters about care under pressure, where every decision costs something.",
 };

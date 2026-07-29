@@ -222,7 +222,7 @@ Eleanor's fluids are running and her blood pressure is improving slowly. You are
 
 **Immediate:** The order goes in. Ninety seconds was optimistic. By the time you reach the hallway another nurse has already called security.
 
-**Institutional response:** Nobody will fault you for finishing the antibiotics. The security call happened without your signature.
+**Institutional response:** The security call happened without your signature.
 
 **Ethical interpretation:** You protected the most time critical treatment and assumed Marcus could wait. He could not, and the decision about him was made by someone else.
 

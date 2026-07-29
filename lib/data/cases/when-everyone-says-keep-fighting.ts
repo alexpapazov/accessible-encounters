@@ -136,9 +136,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
             immediate:
               "Ellen thanks you. You go in knowing which questions you are " +
               "not going to answer.",
-            institutional:
-              "Nobody on the ward will question this. Families ask for it " +
-              "often and staff agree to it often.",
             ethical:
               "Ellen is calmer. Daniel is now the only person on the ward who " +
               "has not been told what is happening to him.",
@@ -170,8 +167,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "Ellen does not like it. She does not argue with it either. She " +
               "asks you to tell her before you have that conversation.",
             institutional:
-              "Nothing about this reaches anyone above you. It also gives you " +
-              "no cover if the family complains later.",
+              "This gives you no cover if the family complains later.",
             ethical:
               "You have left the question with Daniel, which is where it " +
               "started. You have also left Ellen to wait for a conversation " +
@@ -372,8 +368,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "less. He is close to right. He says it is a relief to say it out " +
               "loud.",
             institutional:
-              "You have said nothing that breaches the family request, and you " +
-              "have twenty minutes less for the rest of the round.",
+              "You have twenty minutes less for the rest of the round.",
             ethical:
               "He got to say it first, which leaves the knowledge his. He " +
               "still has not been told anything he can plan around.",
@@ -514,8 +509,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "would be like, and gets an answer to that as well. Ellen says " +
               "nothing for the rest of the conversation.",
             institutional:
-              "Nothing here is out of line, though you have put a colleague on " +
-              "the spot in front of a family.",
+              "You have put a colleague on the spot in front of a family.",
             ethical:
               "Daniel is choosing with the same information the team has. " +
               "Ellen heard it at the same time he did, without being prepared " +
@@ -583,8 +577,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "booked. Daniel agrees to it at the end without asking anything " +
               "further.",
             institutional:
-              "You stayed inside your role and the plan moved. Nothing about " +
-              "this will ever be questioned.",
+              "You stayed inside your role and the plan moved.",
             ethical:
               "The decision was made by the two people in the room who were " +
               "not dying and not treating him.",
@@ -648,8 +641,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
             immediate:
               "The pain settles within the hour. He sleeps through his " +
               "daughter's visit the next morning and she goes home again.",
-            institutional:
-              "Pain controlled, dose within the chart, nothing to report.",
             ethical:
               "His pain was treated properly. The one thing he had asked about " +
               "twice was decided for him while he was in too much pain to " +
@@ -1424,7 +1415,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         "symptom.",
     },
     {
-      source: "Kathleen Watt, Rearranged and course Q and A",
+      source: "Kathleen Watt, Rearranged",
       connection:
         "Watt describes two surgical teams separated by whether they explained " +
         "and shared the decision, and says caregiving includes interpreting a " +

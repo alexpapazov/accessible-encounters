@@ -1,4 +1,4 @@
--- Accessible Clinical Encounters — Phase 2 schema.
+-- Empathetic Encounters — Phase 2 schema.
 -- Run once in the Supabase SQL editor (Dashboard → SQL Editor → New query).
 
 create table public.profiles (

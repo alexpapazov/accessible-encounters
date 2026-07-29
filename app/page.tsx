@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <header className="max-w-3xl">
-        <h1 className="text-4xl font-semibold text-[#3A2B26]">Accessible clinical encounters</h1>
+        <h1 className="text-4xl font-semibold text-[#3A2B26]">Empathetic Encounters</h1>
         <p className="mt-4 text-lg leading-relaxed text-[#5A4A40]">
           Interactive clinical encounters built around one question: what does ethical
           care require when time, staffing, and institutional pressure make every

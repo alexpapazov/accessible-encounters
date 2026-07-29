@@ -76,8 +76,6 @@ Daniel Mercer has been on the ward three days. His pain is worse, he is eating v
 
 **Immediate:** Ellen thanks you. You go in knowing which questions you are not going to answer.
 
-**Institutional response:** Nobody on the ward will question this. Families ask for it often and staff agree to it often.
-
 **Ethical interpretation:** Ellen is calmer. Daniel is now the only person on the ward who has not been told what is happening to him.
 
 **Delayed (at node `going-home`):** Daniel stopped asking staff direct questions after the first day. He asked Nurse Okafor instead. *(Trust and therapeutic relationship -1)*
@@ -92,7 +90,7 @@ Daniel Mercer has been on the ward three days. His pain is worse, he is eating v
 
 **Immediate:** Ellen does not like it. She does not argue with it either. She asks you to tell her before you have that conversation.
 
-**Institutional response:** Nothing about this reaches anyone above you. It also gives you no cover if the family complains later.
+**Institutional response:** This gives you no cover if the family complains later.
 
 **Ethical interpretation:** You have left the question with Daniel, which is where it started. You have also left Ellen to wait for a conversation she cannot stop.
 
@@ -184,7 +182,7 @@ Daniel is sitting up. He waits until Ellen goes to fill his water jug. Then he a
 
 **Immediate:** Daniel says he thinks it is months at the outside and probably less. He is close to right. He says it is a relief to say it out loud.
 
-**Institutional response:** You have said nothing that breaches the family request, and you have twenty minutes less for the rest of the round.
+**Institutional response:** You have twenty minutes less for the rest of the round.
 
 **Ethical interpretation:** He got to say it first, which leaves the knowledge his. He still has not been told anything he can plan around.
 
@@ -250,7 +248,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 **Immediate:** The oncologist gives the number. Daniel asks what the two weeks would be like, and gets an answer to that as well. Ellen says nothing for the rest of the conversation.
 
-**Institutional response:** Nothing here is out of line, though you have put a colleague on the spot in front of a family.
+**Institutional response:** You have put a colleague on the spot in front of a family.
 
 **Ethical interpretation:** Daniel is choosing with the same information the team has. Ellen heard it at the same time he did, without being prepared for it.
 
@@ -282,7 +280,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 **Immediate:** Ellen answers most of the oncologist's questions. The regimen is booked. Daniel agrees to it at the end without asking anything further.
 
-**Institutional response:** You stayed inside your role and the plan moved. Nothing about this will ever be questioned.
+**Institutional response:** You stayed inside your role and the plan moved.
 
 **Ethical interpretation:** The decision was made by the two people in the room who were not dying and not treating him.
 
@@ -311,8 +309,6 @@ Daniel's pain breaks through at two in the morning. Nurse Okafor has given what 
 *Next: → `going-home`*
 
 **Immediate:** The pain settles within the hour. He sleeps through his daughter's visit the next morning and she goes home again.
-
-**Institutional response:** Pain controlled, dose within the chart, nothing to report.
 
 **Ethical interpretation:** His pain was treated properly. The one thing he had asked about twice was decided for him while he was in too much pain to argue.
 
@@ -646,4 +642,4 @@ The oncologist tells you the family has asked for a different doctor and that th
 - **Atul Gawande, Being Mortal** — Gawande's patient Joseph Lazaroff chose a dangerous operation that could never return what he actually wanted, and Gawande's regret is that the team explained the risks carefully while never discussing the reality of the disease. The fourth regimen is that offer, and the hospital ending is that outcome.
 - **Annabelle Gurwitch, The End of My Life Is Killing Me** — Gurwitch refuses the cancer warrior identity in favour of what she calls a cancer slacker, with no runs, no ribbons, and no religion. Ellen calls Daniel a fighter. The case treats that word as something placed on him rather than chosen by him.
 - **Martin Welsh, Laugh to Death** — Welsh was a physician who kept writing about his own dying with ALS on his own terms. Daniel's funeral planning is his in the same way, and the case scores whether it is met as agency or filed as a symptom.
-- **Kathleen Watt, Rearranged and course Q and A** — Watt describes two surgical teams separated by whether they explained and shared the decision, and says caregiving includes interpreting a patient to herself. Her account of being recorded as hallucinating when she was simply without her glasses sits behind the mental health referral choice.
+- **Kathleen Watt, Rearranged** — Watt describes two surgical teams separated by whether they explained and shared the decision, and says caregiving includes interpreting a patient to herself. Her account of being recorded as hallucinating when she was simply without her glasses sits behind the mental health referral choice.

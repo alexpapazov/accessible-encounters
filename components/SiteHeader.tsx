@@ -10,7 +10,7 @@ export default function SiteHeader() {
     <header className="border-b border-[#EFE2D2] bg-[#FBF5EE]">
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
         <Link href="/" className="text-sm font-semibold text-[#3A2B26] hover:text-[#8A5A44]">
-          Accessible clinical encounters
+          Empathetic Encounters
         </Link>
         <nav className="flex items-center gap-4 text-sm">
           <Link href="/" className="text-[#8A5A44] hover:underline">

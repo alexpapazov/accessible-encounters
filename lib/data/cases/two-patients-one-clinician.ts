@@ -524,8 +524,7 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "The order goes in. Ninety seconds was optimistic. By the time you " +
               "reach the hallway another nurse has already called security.",
             institutional:
-              "Nobody will fault you for finishing the antibiotics. The security " +
-              "call happened without your signature.",
+              "The security call happened without your signature.",
             ethical:
               "You protected the most time critical treatment and assumed Marcus " +
               "could wait. He could not, and the decision about him was made by " +
