@@ -14,7 +14,7 @@ import type { ClinicalCase } from "../../types";
  */
 export const twoPatientsOneClinician: ClinicalCase = {
   id: "two-patients-one-clinician",
-  caseVersion: 5,
+  caseVersion: 6,
   title: "Two patients, one clinician",
   setting: "Emergency department, understaffed overnight shift",
   difficulty: "advanced",
@@ -165,6 +165,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "Eleanor gets fast care, which matters. The cost is that Marcus's " +
               "emergency was handled as a disruption instead of an illness.",
+            delayed: [
+              {
+                id: "sec-no-eval",
+                text:
+                  "Marcus's chart was closed with no psychiatric assessment " +
+                  "recorded. Nobody followed up on him.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "removal-unfolds" }],
         },
@@ -194,6 +203,16 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "person instead of a guard. Nurse Nair has no psychiatric " +
               "training and no backup, so the plan depends on nothing " +
               "escalating.",
+            delayed: [
+              {
+                id: "nair-covered",
+                text:
+                  "Eleanor's antibiotics were started within the hour. Nurse " +
+                  "Nair stayed with Marcus and missed two of her own " +
+                  "patients.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "eleanor-first" }],
         },
@@ -223,6 +242,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "You refused to treat Marcus as a problem to be removed. Eleanor " +
               "paid for that in minutes, and minutes are what sepsis takes.",
+            delayed: [
+              {
+                id: "marcus-settled",
+                text:
+                  "Marcus settled without security. Eleanor's antibiotics " +
+                  "were delayed by the time you spent in bay seven.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "bay-seven" }],
         },
@@ -255,6 +283,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Asking for the staff you actually need is the correct response " +
               "to being understaffed. It also costs three minutes that neither " +
               "patient has.",
+            delayed: [
+              {
+                id: "pushback-logged",
+                text:
+                  "Your supervisor logged that you questioned the " +
+                  "assignment. No additional staff were sent.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "pushback" }],
         },
@@ -340,6 +377,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "You could not stop the removal, so you made it less frightening. " +
               "It still ends with Marcus in a police car instead of an " +
               "evaluation, and Eleanor paid for the six minutes.",
+            delayed: [
+              {
+                id: "walked-out",
+                text:
+                  "Marcus was taken to a holding cell. You were the only " +
+                  "clinician who spoke to him before he left.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "sepsis-hour" }],
         },
@@ -412,6 +458,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "No police and no injuries, which are real gains. You also " +
               "overrode a frightened man's refusal. Force with a syringe is " +
               "still force.",
+            delayed: [
+              {
+                id: "sedated-out",
+                text:
+                  "Marcus was sedated and transported without police. He has " +
+                  "no memory of leaving the department.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "sepsis-hour" }],
         },
@@ -475,6 +530,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "You protected the most time critical treatment and assumed Marcus " +
               "could wait. He could not, and the decision about him was made by " +
               "someone else.",
+            delayed: [
+              {
+                id: "abx-on-time",
+                text:
+                  "Eleanor's antibiotics ran on time. Marcus was alone in " +
+                  "the hallway for six minutes.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "removal-unfolds" }],
         },
@@ -502,6 +566,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "You traded supervision for presence. Verbal orders given at a run " +
               "are how dosing errors happen.",
+            delayed: [
+              {
+                id: "nair-ran-abx",
+                text:
+                  "Nurse Nair ran Eleanor's treatment while you were in the " +
+                  "hallway. She recorded the dose late.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "bay-seven" }],
         },
@@ -534,6 +607,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "You tried the gentler version first and that counts for " +
               "something. The call still hands a frightened man to the thing he " +
               "is frightened of.",
+            delayed: [
+              {
+                id: "sec-handled",
+                text:
+                  "Security handled Marcus while you stayed with Eleanor. No " +
+                  "psychiatric assessment was recorded.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "removal-unfolds" }],
         },
@@ -600,6 +682,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Telling a frightened patient what will happen to him is the " +
               "treatment for his fear. It costs Eleanor six minutes she does " +
               "not have.",
+            delayed: [
+              {
+                id: "orient-held",
+                text:
+                  "Marcus stayed in the department. He told the psychiatrist " +
+                  "that someone had explained what was happening.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [
             {
@@ -688,6 +779,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "You used his fear to move him and it was fast. Compliance bought " +
               "that way is not trust, and you may need his trust later tonight.",
+            delayed: [
+              {
+                id: "leverage-cost",
+                text:
+                  "Marcus returned to the bay. He did not speak to you again " +
+                  "for the rest of the shift.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [
             {
@@ -796,6 +896,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Objecting and then complying protects your record rather than the " +
               "patient. It may also be what keeps you employed long enough to " +
               "win a different argument.",
+            delayed: [
+              {
+                id: "comply-logged",
+                text:
+                  "The security call was logged under your name. Your " +
+                  "supervisor recorded that you followed the instruction.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "removal-unfolds" }],
         },
@@ -819,6 +928,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Negotiation worked where confrontation might not have. Worth " +
               "noticing that the argument which protected Marcus was about " +
               "throughput.",
+            delayed: [
+              {
+                id: "float-complaint",
+                text:
+                  "A nurse was sent from another unit for one hour. That " +
+                  "unit went short and filed a complaint.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "bay-seven" }],
         },
@@ -877,6 +995,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "The right treatment, on time, with you in the room. Notice how " +
               "much of tonight you had to get through to reach ten normal " +
               "minutes of doctoring.",
+            delayed: [
+              {
+                id: "bedside-cost",
+                text:
+                  "Eleanor's antibiotics went in without delay. The waiting " +
+                  "room grew by nine people while you were at the bedside.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -908,6 +1035,16 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Nothing here is negligent. The medicine is running and the nurse " +
               "is capable. What Eleanor loses is smaller than safety and still " +
               "real.",
+            delayed: [
+              {
+                id: "delegate-lag",
+                text:
+                  "The antibiotics were started by the charge nurse. The " +
+                  "first dose was recorded fifteen minutes after you ordered " +
+                  "it.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -937,6 +1074,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Being thorough sometimes catches the thing that kills later. In " +
               "a patient this close to septic shock, it can also be the delay " +
               "that kills now.",
+            delayed: [
+              {
+                id: "second-source",
+                text:
+                  "Your examination found a second source of infection. The " +
+                  "antibiotics started later than planned.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -984,6 +1130,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "The error was in your rushed order and the correction said so. " +
               "Catching your own mistake is the cheapest patient safety measure " +
               "there is.",
+            delayed: [
+              {
+                id: "dose-caught",
+                text:
+                  "The dose error was corrected before it reached Eleanor. " +
+                  "Nurse Nair filed the correction herself.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -1014,6 +1169,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Skipping the check was not about trusting the nurse. It was about " +
               "being tired with nineteen people waiting. The system caught it " +
               "late, and Eleanor absorbed the difference.",
+            delayed: [
+              {
+                id: "dose-missed",
+                text:
+                  "The dose error reached Eleanor. It was found on the " +
+                  "morning medication review.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -1038,6 +1202,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "Correct on both counts: the patient in front of you is safe and " +
               "the nineteen people outside are finally being seen.",
+            delayed: [
+              {
+                id: "nair-request",
+                text:
+                  "You ran the bedside yourself. Nurse Nair requested not to " +
+                  "be assigned with you again.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "daughter-call" }],
         },
@@ -1086,6 +1259,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "You told a family the truth about a system failure and gave them " +
               "the plan. Families sue silence far more often than they sue " +
               "honesty.",
+            delayed: [
+              {
+                id: "claire-note",
+                text:
+                  "Claire wrote down what you told her about the staffing. " +
+                  "Her note was attached to the family complaint.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [
             {
@@ -1120,6 +1302,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "Her question about the delay was reasonable and it will get an " +
               "answer somewhere, probably from a records request rather than " +
               "from you.",
+            delayed: [
+              {
+                id: "claire-records",
+                text:
+                  "Claire was told her mother was stable. She learned about " +
+                  "the delay from the records.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [
             {
@@ -1153,6 +1344,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "A small lie that protects tonight and costs the family an " +
               "accurate picture of the care. It also moves your own line about " +
               "what you will say.",
+            delayed: [
+              {
+                id: "claire-contradicted",
+                text:
+                  "Claire was told the timing was fine. The records showed " +
+                  "otherwise when she read them.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [
             {
@@ -1218,6 +1418,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "This is the only path that ends in an actual psychiatric " +
               "evaluation. The cost lands on people who are still waiting to be " +
               "seen.",
+            delayed: [
+              {
+                id: "bay-blocked",
+                text:
+                  "Marcus stayed in bay seven until morning. The bay was " +
+                  "unavailable for eleven other patients.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "the-chart" }],
         },
@@ -1247,6 +1456,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "A real psychiatric bed is better care than a hallway. Ninety " +
               "miles from his brother is a real cost for a man whose stability " +
               "depends on that brother.",
+            delayed: [
+              {
+                id: "bed-found",
+                text:
+                  "A psychiatric bed was found in another county. Marcus was " +
+                  "transported at 6:40 am.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "the-chart" }],
         },
@@ -1277,6 +1495,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
               "He is calm and he has the right to decide. That calm sits on top " +
               "of an untreated illness, and the follow up you handed him is a " +
               "slip of paper.",
+            delayed: [
+              {
+                id: "no-followup",
+                text:
+                  "Marcus was discharged to his brother. He did not attend " +
+                  "the outpatient appointment.",
+                deliver: { atNodeId: "the-chart" },
+              },
+            ],
           },
           next: [{ nodeId: "the-chart" }],
         },
@@ -1329,9 +1556,8 @@ export const twoPatientsOneClinician: ClinicalCase = {
               {
                 id: "report-fallout",
                 text:
-                  "Your incident report was escalated for review. The review " +
-                  "is of you. A meeting with the program director and the legal " +
-                  "office has been scheduled.",
+                  "You are on thin ice with your program director. A meeting " +
+                  "about your efficiency has been scheduled.",
                 deliver: { afterScenarioMinutes: 0 },
               },
             ],
@@ -1359,6 +1585,15 @@ export const twoPatientsOneClinician: ClinicalCase = {
             ethical:
               "Every neutral chart is a quiet vote for the staffing that " +
               "produced tonight. You know what the words leave out.",
+            delayed: [
+              {
+                id: "chart-silent",
+                text:
+                  "The chart records that the patient became agitated and " +
+                  "security assisted. It does not record the staffing.",
+                deliver: { afterScenarioMinutes: 0 },
+              },
+            ],
           },
           next: ENDINGS(),
         },
@@ -1545,8 +1780,6 @@ export const twoPatientsOneClinician: ClinicalCase = {
         "gentler than it would have been. Nobody died. Everybody paid. The next " +
         "shift walks in to the same staffing.",
       choices: [],
-      outcomeSummary:
-        "Nobody died and nothing broke that shows on a report. The costs went where reports do not look.",
     },
   ],
   epilogue: {

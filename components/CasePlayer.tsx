@@ -1020,11 +1020,6 @@ function Results({
         ← All encounters
       </Link>
       <h1 className="mt-1 text-2xl font-semibold text-[#3A2B26]">The encounter is over</h1>
-      {outcomeSummary && (
-        <p className="mt-2 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4 leading-relaxed text-[#5A4A40]">
-          {outcomeSummary}
-        </p>
-      )}
 
       {c.scoring === "standard" && (
         <div className="mt-6 rounded-2xl border border-[#E7D6C4] bg-white p-5">

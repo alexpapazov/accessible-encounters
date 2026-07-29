@@ -143,6 +143,14 @@ clinician" (8 Word comments + chat notes).
     - ✓ "Your incident report was escalated for review. The review is of you.
       A meeting with the program director and the legal office is scheduled."
     State what happened and stop.
+27d. **Every choice carries its own aftermath.** No aftermath text is shared
+    between choices, so a player never sees the same consequence twice for two
+    different decisions. If a new choice is added, it needs its own.
+27e. **Do not write "the review is of you"** or similar reversals for effect.
+    Say the plain version: "You are on thin ice with your program director."
+27f. **The results screen shows no outcome-summary box.** It goes from "The
+    encounter is over" straight to "How the encounter went". Endings are
+    reported by the score rows and the epilogue, not by a closing line.
 28. **Reading connections are a plain "Inspired by" list in the app.** Titles
     only, no explanation of the link. The longer connection notes stay in the
     review exports for the author and reviewers.
