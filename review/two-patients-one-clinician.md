@@ -16,7 +16,7 @@
 > `expert-reviewed` after a named reviewer with relevant lived or
 > professional expertise has actually read the case.
 
-- **Case id:** `two-patients-one-clinician` (v7)
+- **Case id:** `two-patients-one-clinician` (v8)
 - **Setting:** Emergency department, understaffed overnight shift
 - **Difficulty:** advanced · **Modes:** deliberative, timed · **Scoring:** standard
 - **Review status:** draft
@@ -282,7 +282,7 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 *Effects: Operational efficiency -1*
 
-*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `swap-back`; → `sepsis-hour`*
+*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `daughter-call`; → `sepsis-hour`*
 
 **Immediate:** You say it plainly and then stay quiet. Marcus's breathing slows. He stays near the doors but stops looking through them.
 
@@ -298,7 +298,7 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 *Effects: Operational efficiency -1*
 
-*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `swap-back`; → `sepsis-hour`*
+*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `daughter-call`; → `sepsis-hour`*
 
 **Immediate:** His brother's name lands. Marcus looks at you and asks whether Andre knows he is here. He steps away from the doors.
 
@@ -314,7 +314,7 @@ You and Marcus, a few steps apart. He is watching your hands. Your phone buzzes 
 
 *Effects: Operational efficiency +2, Professional integrity -1*
 
-*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `swap-back`; → `sepsis-hour`*
+*Next: if chose `ef-swap` OR chose `pb-hold-line` OR chose `pb-float` → `daughter-call`; → `sepsis-hour`*
 
 **Immediate:** It works. Marcus walks back to bay seven along the far wall, watching you the whole way.
 
@@ -439,62 +439,6 @@ Back with Eleanor. Her blood pressure is holding after two liters of fluid but h
 **Ethical interpretation:** Being thorough sometimes catches the thing that kills later. In a patient this close to septic shock, it can also be the delay that kills now.
 
 **Delayed (at node `the-chart`):** Your examination found a second source of infection. The antibiotics started later than planned.
-
-## Node: Checking the orders `swap-back`
-
-*night · ⏱ 28s timer · present — Eleanor Vance, Nurse Nair, You · Eleanor Vance: exhausted, Nurse Nair: uncertain*
-
-**Situation:**
-
-You come back to Eleanor's bay. Nurse Nair has run the treatment on your verbal orders. Fluids right, samples drawn, antibiotics hanging. The dose on the pump is the standard one and Eleanor's kidney results call for a lower one. Your order was the problem.
-
-### Choice 1 `sb-recheck` — 6 min
-
-**Recheck the orders with Nurse Nair and correct the dose now.**
-
-*Effects: Quality of care +2, Operational efficiency -1*
-
-*Next: → `daughter-call`*
-
-**Immediate:** You go through it together and the dose is fixed in two minutes.
-
-**Institutional response:** Six minutes the hospital cannot bill, and the only real safety check that happened tonight.
-
-**Ethical interpretation:** The error was in your rushed order and the correction said so. Catching your own mistake is the cheapest patient safety measure there is.
-
-**Delayed (at node `the-chart`):** The dose error was corrected before it reached Eleanor. Nurse Nair filed the correction herself.
-
-### Choice 2 `sb-trust` — TIME-SAVER · 2 min
-
-**Glance at the numbers, thank her, and move on to the waiting room.**
-
-*Effects: Operational efficiency +2, Quality of care -2*
-
-*Next: → `daughter-call`*
-
-**Immediate:** You are three charts away when the pharmacy calls about the kidney dose. Eleanor has had two hours of a dose her kidneys cannot clear.
-
-**Institutional response:** The near miss will not appear in any report, because reporting it means explaining the hour that produced it.
-
-**Ethical interpretation:** Skipping the check was not about trusting the nurse. It was about being tired with nineteen people waiting. The system caught it late, and Eleanor absorbed the difference.
-
-**Delayed (at node `the-chart`):** The dose error reached Eleanor. It was found on the morning medication review.
-
-### Choice 3 `sb-takeover` — 4 min
-
-**Take the bedside back and send Nurse Nair to the waiting room.**
-
-*Effects: Quality of care +1*
-
-*Next: → `daughter-call`*
-
-**Immediate:** You take over, catch the dosing problem yourself, and fix it. Nurse Nair starts working through the waiting room.
-
-**Institutional response:** Normal roles restored and the board moving again.
-
-**Ethical interpretation:** Eleanor is safe and the waiting room is moving. Marcus is on his own again.
-
-**Delayed (at node `the-chart`):** You ran the bedside yourself. Nurse Nair requested not to be assigned with you again.
 
 ## Node: Claire on the phone `daughter-call`
 
@@ -628,7 +572,7 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 *Effects: Professional integrity +2, Quality of care +1, Risk and compliance -1, Personal sustainability -1*
 
-*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND clock < T+55 AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+24 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** You record what happened, in order, with times. Written accurately it reads like an accusation, because an accurate record of tonight accuses the schedule.
 
@@ -644,7 +588,7 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 *Effects: Risk and compliance +2, Operational efficiency +1, Professional integrity -2*
 
-*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND clock < T+55 AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+24 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** The sentences write themselves. Save, sign, and tonight officially went fine.
 
@@ -660,7 +604,7 @@ Marcus is in bay seven and calmer. There is no psychiatrist until 8 am and no ps
 
 *Effects: Personal sustainability -1, Quality of care -1, Risk and compliance -1*
 
-*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND clock < T+55 AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+55 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
+*Next: if ? AND clock ≥ T+30 → `ending-eleanor-dies`; if ? OR ? → `ending-sued`; if ? OR ? → `ending-fired`; if NOT (visited `removal-unfolds`) AND ? AND ? → `ending-both-held`; if NOT (visited `removal-unfolds`) AND clock ≥ T+24 → `ending-swap-cost`; if NOT (visited `removal-unfolds`) → `ending-frayed`; if chose `ru-accompany` OR chose `ru-sedate` → `ending-frayed`; → `ending-corl`*
 
 **Immediate:** The charts are still open at 7 am when the day team arrives, and your documentation gets written in eleven exhausted minutes.
 

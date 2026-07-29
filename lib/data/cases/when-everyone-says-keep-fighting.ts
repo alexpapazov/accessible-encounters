@@ -28,7 +28,7 @@ const ENDINGS = (): NextRule[] => [
 
 export const whenEveryoneSaysKeepFighting: ClinicalCase = {
   id: "when-everyone-says-keep-fighting",
-  caseVersion: 1,
+  caseVersion: 2,
   title: "When everyone says keep fighting",
   setting: "Cancer ward, four days before a discharge decision",
   difficulty: "advanced",
@@ -496,7 +496,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-arrangements" }],
+          next: [{ nodeId: "the-night" }],
         },
         {
           id: "ar-odds",
@@ -531,7 +531,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-arrangements" }],
+          next: [{ nodeId: "the-night" }],
         },
         {
           id: "ar-oppose",
@@ -565,7 +565,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-arrangements" }],
+          next: [{ nodeId: "the-night" }],
         },
         {
           id: "ar-quiet",
@@ -599,141 +599,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-arrangements" }],
-        },
-      ],
-    },
-    /* ------------------------------------------------------------ */
-    {
-      id: "the-arrangements",
-      title: "What he has been planning",
-      day: 2,
-      timeOfDay: "afternoon",
-      inlineCaption: "Later that afternoon",
-      scene: {
-        setting: "clinic",
-        present: ["daniel", "clinician"],
-        moods: { daniel: "engaged" },
-        focus: "daniel",
-        bubbles: [
-          {
-            characterId: "daniel",
-            text: "I have most of it worked out. Nobody at home will let me finish.",
-          },
-        ],
-      },
-      situation:
-        "Daniel is alone for once. He tells you he has been planning his own " +
-        "funeral and has already decided most of it. He is not upset and he is " +
-        "not asking you for anything. He says nobody at home will let him " +
-        "finish a sentence about it. Nurse Okafor has written in the notes " +
-        "that he seems low in mood.",
-      perspectives: [
-        {
-          characterId: "daniel",
-          text:
-            "Daniel has been working this out for weeks and has had nowhere " +
-            "to say it. He is watching to see whether you stay in the " +
-            "conversation or move him on.",
-        },
-      ],
-      choices: [
-        {
-          id: "fu-follow",
-          label: "Ask him what he has decided.",
-          effects: {
-            qualityOfCare: -1,
-            agencyDignity: 2,
-            trustRelationship: 2,
-            clinicalWellbeing: 1,
-            operationalEfficiency: -1,
-            riskCompliance: -1,
-          },
-          feedback: {
-            immediate:
-              "He has decided most of it. He has not told anyone in his family " +
-              "any of it. He asks you not to repeat it yet.",
-            institutional:
-              "None of this is documented anywhere and none of it is billable.",
-            ethical:
-              "He got to finish the conversation he has been trying to have. " +
-              "You are now holding something his wife does not know.",
-            delayed: [
-              {
-                id: "fu-follow-after",
-                text:
-                  "Daniel wrote his instructions down and kept them in the " +
-                  "drawer beside the bed. He mentioned them again on the last " +
-                  "morning.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { agencyDignity: 1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "the-night" }],
-        },
-        {
-          id: "fu-redirect",
-          label: "Bring him back to his pain and his eating.",
-          effects: {
-            operationalEfficiency: 1,
-            qualityOfCare: 1,
-            agencyDignity: -2,
-            trustRelationship: -1,
-          },
-          feedback: {
-            immediate:
-              "He answers the questions about his pain. He does not go back to " +
-              "what he was saying.",
-            institutional:
-              "This is a clean, efficient review of symptoms and it is what the " +
-              "round is for.",
-            ethical:
-              "You got the clinical information you needed. He tried to talk " +
-              "about his death and was moved on to his appetite.",
-            delayed: [
-              {
-                id: "fu-redirect-after",
-                text:
-                  "Daniel did not raise his funeral with any member of staff " +
-                  "again.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { trustRelationship: -1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "the-night" }],
-        },
-        {
-          id: "fu-flag",
-          label: "Take it as a warning sign and refer him for a mental health review.",
-          effects: {
-            riskCompliance: 2,
-            qualityOfCare: 1,
-            agencyDignity: -2,
-            trustRelationship: -2,
-          },
-          feedback: {
-            immediate:
-              "The referral is accepted. Daniel is asked twice the next day " +
-              "whether he has thoughts of harming himself.",
-            institutional:
-              "Documented, referred, and defensible. This is exactly what the " +
-              "policy asks you to do with that kind of remark.",
-            ethical:
-              "You treated the one thing he was doing for himself as a symptom " +
-              "of something wrong with him.",
-            delayed: [
-              {
-                id: "fu-flag-after",
-                text:
-                  "The mental health team found no illness and closed the " +
-                  "referral. Daniel stopped raising it with staff.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { agencyDignity: -1 },
-              },
-            ],
-          },
           next: [{ nodeId: "the-night" }],
         },
       ],
@@ -753,7 +618,8 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
       },
       situation:
         "Daniel's pain breaks through at two in the morning. Nurse Okafor has " +
-        "given what she can give without you. The full dose written on his " +
+        "given what she can give without you. He says he has had enough and " +
+        "that he wants it to stop. The full dose written on his " +
         "chart will settle it and will also keep him drowsy through most of " +
         "tomorrow. A lower dose will leave him uncomfortable and awake. His " +
         "daughter is visiting in the morning and he has asked twice when she " +
@@ -763,7 +629,8 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           characterId: "daniel",
           text:
             "Daniel wants the pain to stop. He also wants to be awake when his " +
-            "daughter comes. He has not been asked which one matters more.",
+            "daughter comes. Nobody has asked him which matters more, or what " +
+            "he meant by wanting it to stop.",
         },
       ],
       choices: [
@@ -793,7 +660,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
                 text:
                   "Nora came in the morning and sat with her father for an hour " +
                   "while he slept. She did not come back before the wedding.",
-                deliver: { atNodeId: "the-meeting" },
+                deliver: { atNodeId: "discharge-day" },
                 effects: { agencyDignity: -1 },
               },
             ],
@@ -826,7 +693,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
                 text:
                   "Nora stayed most of the day. She told the ward clerk it was " +
                   "the first real conversation she had had with him in a month.",
-                deliver: { atNodeId: "the-meeting" },
+                deliver: { atNodeId: "discharge-day" },
                 effects: { trustRelationship: 1 },
               },
             ],
@@ -858,8 +725,42 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
                 text:
                   "Daniel asked the next day who had decided. He was told his " +
                   "wife had been called.",
-                deliver: { atNodeId: "the-meeting" },
+                deliver: { atNodeId: "discharge-day" },
                 effects: { trustRelationship: -1 },
+              },
+            ],
+          },
+          next: [{ nodeId: "going-home" }],
+        },
+        {
+          id: "tn-refer",
+          label:
+            "Treat what he said as a warning sign and refer him for a mental health review.",
+          effects: {
+            riskCompliance: 2,
+            qualityOfCare: 1,
+            agencyDignity: -2,
+            trustRelationship: -2,
+          },
+          feedback: {
+            immediate:
+              "The referral is accepted. Daniel is asked twice the next day " +
+              "whether he has thoughts of harming himself. Nobody asks him " +
+              "what he meant at two in the morning.",
+            institutional:
+              "Documented, referred, and defensible. This is what the policy " +
+              "asks you to do with a remark like that.",
+            ethical:
+              "A man in severe pain said he wanted the pain to stop. It was " +
+              "recorded as something wrong with his mind.",
+            delayed: [
+              {
+                id: "tn-refer-after",
+                text:
+                  "The mental health team found no illness and closed the " +
+                  "referral. Daniel stopped telling staff how bad the pain was.",
+                deliver: { atNodeId: "discharge-day" },
+                effects: { clinicalWellbeing: -1 },
               },
             ],
           },
@@ -931,7 +832,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-meeting" }],
+          next: [{ nodeId: "discharge-day" }],
         },
         {
           id: "gh-risks",
@@ -967,7 +868,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-meeting" }],
+          next: [{ nodeId: "discharge-day" }],
         },
         {
           id: "gh-refuse",
@@ -1000,7 +901,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-meeting" }],
+          next: [{ nodeId: "discharge-day" }],
         },
         {
           id: "gh-tell-ellen",
@@ -1027,177 +928,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
                 text:
                   "Daniel stopped raising the wedding with staff. Ellen raised " +
                   "it instead, to say it was not realistic.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { trustRelationship: -1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "the-meeting" }],
-        },
-      ],
-    },
-    /* ------------------------------------------------------------ */
-    {
-      id: "the-meeting",
-      title: "The family meeting",
-      day: 3,
-      timeOfDay: "afternoon",
-      inlineCaption: "Later that afternoon",
-      scene: {
-        setting: "clinic",
-        present: ["daniel", "clinician", "ellen", "nora"],
-        moods: { daniel: "exhausted", ellen: "frustrated", nora: "uncertain" },
-        focus: "ellen",
-      },
-      situation:
-        "Ellen has asked for a family meeting. Nora has driven up and is in " +
-        "the corridor. Ellen wants to talk about the next treatment and about " +
-        "what she calls keeping his spirits up. Nora has started to work out " +
-        "for herself how ill her father is and has asked you directly whether " +
-        "he will be at her wedding.",
-      perspectives: [
-        {
-          characterId: "ellen",
-          text:
-            "Ellen thinks that if the room stays positive he will hold on " +
-            "longer. She has not considered that he might want something " +
-            "different from more time.",
-        },
-        {
-          characterId: "nora",
-          text:
-            "Nora would move the wedding if someone told her that would help. " +
-            "Nobody has told her anything clearly enough for her to act on.",
-        },
-      ],
-      choices: [
-        {
-          id: "tm-daniel-leads",
-          label: "Hold the meeting with Daniel in the room, and let him say what he wants.",
-          effects: {
-            agencyDignity: 3,
-            trustRelationship: 2,
-            professionalIntegrity: 2,
-            operationalEfficiency: -2,
-            riskCompliance: -1,
-          },
-          feedback: {
-            immediate:
-              "Daniel tells them he wants to stop treatment and be at the " +
-              "wedding. Ellen cries and does not agree. Nora says she will " +
-              "move the date if he wants.",
-            institutional:
-              "The meeting runs an hour over and ends without an agreed plan " +
-              "on paper.",
-            ethical:
-              "The three of them now know the same things. The family is in " +
-              "pain, and they are in pain about something real.",
-            delayed: [
-              {
-                id: "tm-daniel-leads-after",
-                text:
-                  "Ellen stopped asking staff to avoid the word dying. She did " +
-                  "not agree with the plan and she stopped fighting it.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { trustRelationship: 1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "discharge-day" }],
-        },
-        {
-          id: "tm-family-first",
-          label: "Meet the family first without him, so they are prepared.",
-          effects: {
-            operationalEfficiency: 2,
-            riskCompliance: 1,
-            agencyDignity: -3,
-            trustRelationship: -1,
-          },
-          feedback: {
-            immediate:
-              "The meeting goes smoothly. Ellen and Nora leave with a shared " +
-              "understanding. Daniel is told afterwards what was agreed.",
-            institutional:
-              "A prepared family is an easier family, and the meeting finished " +
-              "on time.",
-            ethical:
-              "The conversation about his death happened in a room he was not " +
-              "in. He is the last person to be told what was decided.",
-            delayed: [
-              {
-                id: "tm-family-first-after",
-                text:
-                  "Daniel asked Nurse Okafor what had been said in the meeting. " +
-                  "She had not been there.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { agencyDignity: -1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "discharge-day" }],
-        },
-        {
-          id: "tm-answer-nora",
-          label: "Answer Nora's question straight before the meeting starts.",
-          effects: {
-            operationalEfficiency: -1,
-            trustRelationship: 2,
-            professionalIntegrity: 2,
-            agencyDignity: 1,
-            riskCompliance: -2,
-            personalSustainability: -1,
-          },
-          feedback: {
-            immediate:
-              "You tell Nora that her father is dying and that seven days is " +
-              "not certain. She goes into the meeting having already decided " +
-              "she will do whatever he wants.",
-            institutional:
-              "You told an adult child something the patient's wife had asked " +
-              "the team not to say.",
-            ethical:
-              "Nora can act now instead of guessing. You told her before her " +
-              "father had the chance to.",
-            delayed: [
-              {
-                id: "tm-answer-nora-after",
-                text:
-                  "Nora moved the ceremony forward by three days and told her " +
-                  "father herself.",
-                deliver: { atNodeId: "discharge-day" },
-                effects: { clinicalWellbeing: 1 },
-              },
-            ],
-          },
-          next: [{ nodeId: "discharge-day" }],
-        },
-        {
-          id: "tm-keep-positive",
-          label: "Run the meeting the way Ellen has asked, and keep it on treatment.",
-          effects: {
-            operationalEfficiency: 2,
-            riskCompliance: 2,
-            professionalIntegrity: -3,
-            agencyDignity: -2,
-          },
-          feedback: {
-            immediate:
-              "The meeting is calm and short. The plan on paper is the fourth " +
-              "round of chemotherapy. Nora leaves without asking her question " +
-              "again.",
-            institutional:
-              "A calm family, an agreed plan, and a meeting that finished " +
-              "early. This is what a good family meeting looks like on paper.",
-            ethical:
-              "Everyone left the room comfortable except the person the meeting " +
-              "was about.",
-            delayed: [
-              {
-                id: "tm-keep-positive-after",
-                text:
-                  "Nora went home and continued planning the wedding as before. " +
-                  "Daniel did not tell her anything.",
                 deliver: { atNodeId: "discharge-day" },
                 effects: { trustRelationship: -1 },
               },
@@ -1272,7 +1002,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           next: [
             ...ENDINGS(),
             {
-              when: { metricBelow: ["clinicalWellbeing", -1] },
+              when: { metricBelow: ["clinicalWellbeing", -2] },
               nodeId: "ending-died-on-the-way",
               reason: "He was too unwell for the drive by the time it was arranged",
             },
@@ -1327,7 +1057,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           next: [
             ...ENDINGS(),
             {
-              when: { metricBelow: ["clinicalWellbeing", -2] },
+              when: { metricBelow: ["clinicalWellbeing", -3] },
               nodeId: "ending-died-on-the-way",
               reason: "He was too unwell for the drive by the time it was arranged",
             },
@@ -1378,12 +1108,12 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               reason: "He stayed on the ward and stayed on treatment",
             },
             {
-              when: { chose: "tm-keep-positive" },
+              when: { chose: "co-agree" },
               nodeId: "ending-hospital-treatment",
               reason: "He stayed on the ward and nobody had told him why",
             },
             {
-              when: { metricAtLeast: ["agencyDignity", 2] },
+              when: { metricAtLeast: ["agencyDignity", 0] },
               nodeId: "ending-hospital-honest",
               reason: "He stayed, and he knew what was happening",
             },
@@ -1528,12 +1258,12 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         when: {
           any: [
             {
-              all: [{ chose: "dd-send" }, { metricBelow: ["clinicalWellbeing", -1] }],
+              all: [{ chose: "dd-send" }, { metricBelow: ["clinicalWellbeing", -2] }],
             },
             {
               all: [
                 { chose: "dd-send-with-plan" },
-                { metricBelow: ["clinicalWellbeing", -2] },
+                { metricBelow: ["clinicalWellbeing", -3] },
               ],
             },
           ],
@@ -1580,8 +1310,8 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         when: {
           all: [
             { not: { chose: "ar-support" } },
-            { not: { chose: "tm-keep-positive" } },
-            { metricAtLeast: ["agencyDignity", 2] },
+            { not: { chose: "co-agree" } },
+            { metricAtLeast: ["agencyDignity", 0] },
           ],
         },
         text:

@@ -167,6 +167,19 @@ clinician" (8 Word comments + chat notes).
     lands on is never in the path and any such condition silently never fires.
     Key epilogue text off the same conditions the ending routing uses, and
     verify that each ending maps to exactly one reflection per character.
+27l. **A scenario asks at most 5 or 6 decisions per playthrough.** Owner:
+    "there should be no more than 5-6 choices, remake the scenarios so that
+    there are not so many choices to make, this means less outcomes, but make
+    these outcomes as varied as possible." Count decisions along a single
+    route, not decision nodes in the file: a branching case can hold more nodes
+    as long as no one playthrough passes through more than six. Fewer decisions
+    shrink every metric range, so re-measure and retune the ending thresholds
+    afterwards or the extremes stop firing.
+27m. **Every ending must be reachable, and no ending should swallow the run.**
+    Check with a full path walk before shipping. An ending gated on a value the
+    case can never reach is dead text: `ending-swap-cost` sat behind a clock of
+    55 when the clock topped out at 41, so it never fired once in 1,296 paths
+    and the catch-all took its share.
 27k. **Never write humour, jokes, or comic beats.** Owner: "this whole gambler
     thing is really funky and weird I don't like it, do not try to be funny."
     - ✗ "Tell them no hymns. I want the one about the gambler."

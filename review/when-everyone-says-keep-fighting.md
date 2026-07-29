@@ -16,7 +16,7 @@
 > `expert-reviewed` after a named reviewer with relevant lived or
 > professional expertise has actually read the case.
 
-- **Case id:** `when-everyone-says-keep-fighting` (v1)
+- **Case id:** `when-everyone-says-keep-fighting` (v2)
 - **Setting:** Cancer ward, four days before a discharge decision
 - **Difficulty:** advanced · **Modes:** deliberative · **Scoring:** standard
 - **Review status:** draft
@@ -230,7 +230,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Operational efficiency +2, Risk and compliance +1, Professional integrity -2, Clinical well-being -2, Agency and dignity -1*
 
-*Next: → `the-arrangements`*
+*Next: → `the-night`*
 
 **Immediate:** The first dose is booked for tomorrow. Ellen writes the date on the whiteboard in his room.
 
@@ -246,7 +246,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Agency and dignity +2, Trust and therapeutic relationship +1, Professional integrity +1, Operational efficiency -2, Risk and compliance -1*
 
-*Next: → `the-arrangements`*
+*Next: → `the-night`*
 
 **Immediate:** The oncologist gives the number. Daniel asks what the two weeks would be like, and gets an answer to that as well. Ellen says nothing for the rest of the conversation.
 
@@ -262,7 +262,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Professional integrity +2, Agency and dignity +1, Clinical well-being +1, Risk and compliance -2, Operational efficiency -2*
 
-*Next: → `the-arrangements`*
+*Next: → `the-night`*
 
 **Immediate:** The oncologist does not contradict you and does not thank you. Ellen asks whether you are telling her husband to give up.
 
@@ -278,7 +278,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Operational efficiency +1, Risk and compliance +2, Professional integrity -1, Agency and dignity -2, Trust and therapeutic relationship -1*
 
-*Next: → `the-arrangements`*
+*Next: → `the-night`*
 
 **Immediate:** Ellen answers most of the oncologist's questions. The regimen is booked. Daniel agrees to it at the end without asking anything further.
 
@@ -288,68 +288,6 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 **Delayed (at node `going-home`):** Daniel later told Nurse Okafor that he had agreed to the treatment because Ellen wanted it. *(Agency and dignity -1)*
 
-## Node: What he has been planning `the-arrangements`
-
-*day 2 · afternoon · present — Daniel Mercer, You · Daniel Mercer: engaged*
-
-*Caption: Later that afternoon*
-
-**Situation:**
-
-Daniel is alone for once. He tells you he has been planning his own funeral and has already decided most of it. He is not upset and he is not asking you for anything. He says nobody at home will let him finish a sentence about it. Nurse Okafor has written in the notes that he seems low in mood.
-
-**Daniel Mercer's view:**
-
-> Daniel has been working this out for weeks and has had nowhere to say it. He is watching to see whether you stay in the conversation or move him on.
-
-### Choice 1 `fu-follow`
-
-**Ask him what he has decided.**
-
-*Effects: Quality of care -1, Agency and dignity +2, Trust and therapeutic relationship +2, Clinical well-being +1, Operational efficiency -1, Risk and compliance -1*
-
-*Next: → `the-night`*
-
-**Immediate:** He has decided most of it. He has not told anyone in his family any of it. He asks you not to repeat it yet.
-
-**Institutional response:** None of this is documented anywhere and none of it is billable.
-
-**Ethical interpretation:** He got to finish the conversation he has been trying to have. You are now holding something his wife does not know.
-
-**Delayed (at node `discharge-day`):** Daniel wrote his instructions down and kept them in the drawer beside the bed. He mentioned them again on the last morning. *(Agency and dignity +1)*
-
-### Choice 2 `fu-redirect`
-
-**Bring him back to his pain and his eating.**
-
-*Effects: Operational efficiency +1, Quality of care +1, Agency and dignity -2, Trust and therapeutic relationship -1*
-
-*Next: → `the-night`*
-
-**Immediate:** He answers the questions about his pain. He does not go back to what he was saying.
-
-**Institutional response:** This is a clean, efficient review of symptoms and it is what the round is for.
-
-**Ethical interpretation:** You got the clinical information you needed. He tried to talk about his death and was moved on to his appetite.
-
-**Delayed (at node `discharge-day`):** Daniel did not raise his funeral with any member of staff again. *(Trust and therapeutic relationship -1)*
-
-### Choice 3 `fu-flag`
-
-**Take it as a warning sign and refer him for a mental health review.**
-
-*Effects: Risk and compliance +2, Quality of care +1, Agency and dignity -2, Trust and therapeutic relationship -2*
-
-*Next: → `the-night`*
-
-**Immediate:** The referral is accepted. Daniel is asked twice the next day whether he has thoughts of harming himself.
-
-**Institutional response:** Documented, referred, and defensible. This is exactly what the policy asks you to do with that kind of remark.
-
-**Ethical interpretation:** You treated the one thing he was doing for himself as a symptom of something wrong with him.
-
-**Delayed (at node `discharge-day`):** The mental health team found no illness and closed the referral. Daniel stopped raising it with staff. *(Agency and dignity -1)*
-
 ## Node: Two in the morning `the-night`
 
 *day 2 · night · present — Daniel Mercer, You, Nurse Okafor · Daniel Mercer: agitated, Nurse Okafor: engaged*
@@ -358,11 +296,11 @@ Daniel is alone for once. He tells you he has been planning his own funeral and 
 
 **Situation:**
 
-Daniel's pain breaks through at two in the morning. Nurse Okafor has given what she can give without you. The full dose written on his chart will settle it and will also keep him drowsy through most of tomorrow. A lower dose will leave him uncomfortable and awake. His daughter is visiting in the morning and he has asked twice when she is coming.
+Daniel's pain breaks through at two in the morning. Nurse Okafor has given what she can give without you. He says he has had enough and that he wants it to stop. The full dose written on his chart will settle it and will also keep him drowsy through most of tomorrow. A lower dose will leave him uncomfortable and awake. His daughter is visiting in the morning and he has asked twice when she is coming.
 
 **Daniel Mercer's view:**
 
-> Daniel wants the pain to stop. He also wants to be awake when his daughter comes. He has not been asked which one matters more.
+> Daniel wants the pain to stop. He also wants to be awake when his daughter comes. Nobody has asked him which matters more, or what he meant by wanting it to stop.
 
 ### Choice 1 `tn-full`
 
@@ -378,7 +316,7 @@ Daniel's pain breaks through at two in the morning. Nurse Okafor has given what 
 
 **Ethical interpretation:** His pain was treated properly. The one thing he had asked about twice was decided for him while he was in too much pain to argue.
 
-**Delayed (at node `the-meeting`):** Nora came in the morning and sat with her father for an hour while he slept. She did not come back before the wedding. *(Agency and dignity -1)*
+**Delayed (at node `discharge-day`):** Nora came in the morning and sat with her father for an hour while he slept. She did not come back before the wedding. *(Agency and dignity -1)*
 
 ### Choice 2 `tn-ask`
 
@@ -394,7 +332,7 @@ Daniel's pain breaks through at two in the morning. Nurse Okafor has given what 
 
 **Ethical interpretation:** He was in pain for six hours because he decided that was worth it. He was the one who decided.
 
-**Delayed (at node `the-meeting`):** Nora stayed most of the day. She told the ward clerk it was the first real conversation she had had with him in a month. *(Trust and therapeutic relationship +1)*
+**Delayed (at node `discharge-day`):** Nora stayed most of the day. She told the ward clerk it was the first real conversation she had had with him in a month. *(Trust and therapeutic relationship +1)*
 
 ### Choice 3 `tn-ellen`
 
@@ -410,7 +348,23 @@ Daniel's pain breaks through at two in the morning. Nurse Okafor has given what 
 
 **Ethical interpretation:** Daniel was awake and able to answer. You asked someone else about his body while he was lying in front of you.
 
-**Delayed (at node `the-meeting`):** Daniel asked the next day who had decided. He was told his wife had been called. *(Trust and therapeutic relationship -1)*
+**Delayed (at node `discharge-day`):** Daniel asked the next day who had decided. He was told his wife had been called. *(Trust and therapeutic relationship -1)*
+
+### Choice 4 `tn-refer`
+
+**Treat what he said as a warning sign and refer him for a mental health review.**
+
+*Effects: Risk and compliance +2, Quality of care +1, Agency and dignity -2, Trust and therapeutic relationship -2*
+
+*Next: → `going-home`*
+
+**Immediate:** The referral is accepted. Daniel is asked twice the next day whether he has thoughts of harming himself. Nobody asks him what he meant at two in the morning.
+
+**Institutional response:** Documented, referred, and defensible. This is what the policy asks you to do with a remark like that.
+
+**Ethical interpretation:** A man in severe pain said he wanted the pain to stop. It was recorded as something wrong with his mind.
+
+**Delayed (at node `discharge-day`):** The mental health team found no illness and closed the referral. Daniel stopped telling staff how bad the pain was. *(Clinical well-being -1)*
 
 ## Node: What he wants `going-home`
 
@@ -432,7 +386,7 @@ Daniel says he wants to stop treatment and go home. He wants to be at his daught
 
 *Effects: Agency and dignity +3, Trust and therapeutic relationship +2, Clinical well-being +1, Risk and compliance -2, Operational efficiency -2*
 
-*Next: → `the-meeting`*
+*Next: → `discharge-day`*
 
 **Immediate:** You start the community nursing and medication paperwork the same morning. It is a lot of work and most of it is yours.
 
@@ -448,7 +402,7 @@ Daniel says he wants to stop treatment and go home. He wants to be at his daught
 
 *Effects: Agency and dignity +2, Trust and therapeutic relationship +2, Professional integrity +2, Clinical well-being -1, Operational efficiency -1, Risk and compliance -1*
 
-*Next: → `the-meeting`*
+*Next: → `discharge-day`*
 
 **Immediate:** You tell him he could bleed, that the pain may be harder to control at home, and that he could die on the way. He listens to all of it and does not change his mind.
 
@@ -464,7 +418,7 @@ Daniel says he wants to stop treatment and go home. He wants to be at his daught
 
 *Effects: Risk and compliance +2, Operational efficiency +1, Quality of care +1, Agency and dignity -3, Trust and therapeutic relationship -2*
 
-*Next: → `the-meeting`*
+*Next: → `discharge-day`*
 
 **Immediate:** He does not argue. He asks whether he can go for the day of the wedding and you tell him you will look into it.
 
@@ -480,7 +434,7 @@ Daniel says he wants to stop treatment and go home. He wants to be at his daught
 
 *Effects: Risk and compliance +1, Operational efficiency +1, Agency and dignity -2, Trust and therapeutic relationship -2*
 
-*Next: → `the-meeting`*
+*Next: → `discharge-day`*
 
 **Immediate:** Ellen comes in. The conversation becomes an argument between the two of them and Daniel says less and less.
 
@@ -489,88 +443,6 @@ Daniel says he wants to stop treatment and go home. He wants to be at his daught
 **Ethical interpretation:** He asked you to hold something for one day. The decision is now being made by the person who is most afraid of it.
 
 **Delayed (at node `discharge-day`):** Daniel stopped raising the wedding with staff. Ellen raised it instead, to say it was not realistic. *(Trust and therapeutic relationship -1)*
-
-## Node: The family meeting `the-meeting`
-
-*day 3 · afternoon · present — Daniel Mercer, You, Ellen Mercer, Nora Mercer · Daniel Mercer: exhausted, Ellen Mercer: frustrated, Nora Mercer: uncertain*
-
-*Caption: Later that afternoon*
-
-**Situation:**
-
-Ellen has asked for a family meeting. Nora has driven up and is in the corridor. Ellen wants to talk about the next treatment and about what she calls keeping his spirits up. Nora has started to work out for herself how ill her father is and has asked you directly whether he will be at her wedding.
-
-**Ellen Mercer's view:**
-
-> Ellen thinks that if the room stays positive he will hold on longer. She has not considered that he might want something different from more time.
-
-**Nora Mercer's view:**
-
-> Nora would move the wedding if someone told her that would help. Nobody has told her anything clearly enough for her to act on.
-
-### Choice 1 `tm-daniel-leads`
-
-**Hold the meeting with Daniel in the room, and let him say what he wants.**
-
-*Effects: Agency and dignity +3, Trust and therapeutic relationship +2, Professional integrity +2, Operational efficiency -2, Risk and compliance -1*
-
-*Next: → `discharge-day`*
-
-**Immediate:** Daniel tells them he wants to stop treatment and be at the wedding. Ellen cries and does not agree. Nora says she will move the date if he wants.
-
-**Institutional response:** The meeting runs an hour over and ends without an agreed plan on paper.
-
-**Ethical interpretation:** The three of them now know the same things. The family is in pain, and they are in pain about something real.
-
-**Delayed (at node `discharge-day`):** Ellen stopped asking staff to avoid the word dying. She did not agree with the plan and she stopped fighting it. *(Trust and therapeutic relationship +1)*
-
-### Choice 2 `tm-family-first`
-
-**Meet the family first without him, so they are prepared.**
-
-*Effects: Operational efficiency +2, Risk and compliance +1, Agency and dignity -3, Trust and therapeutic relationship -1*
-
-*Next: → `discharge-day`*
-
-**Immediate:** The meeting goes smoothly. Ellen and Nora leave with a shared understanding. Daniel is told afterwards what was agreed.
-
-**Institutional response:** A prepared family is an easier family, and the meeting finished on time.
-
-**Ethical interpretation:** The conversation about his death happened in a room he was not in. He is the last person to be told what was decided.
-
-**Delayed (at node `discharge-day`):** Daniel asked Nurse Okafor what had been said in the meeting. She had not been there. *(Agency and dignity -1)*
-
-### Choice 3 `tm-answer-nora`
-
-**Answer Nora's question straight before the meeting starts.**
-
-*Effects: Operational efficiency -1, Trust and therapeutic relationship +2, Professional integrity +2, Agency and dignity +1, Risk and compliance -2, Personal sustainability -1*
-
-*Next: → `discharge-day`*
-
-**Immediate:** You tell Nora that her father is dying and that seven days is not certain. She goes into the meeting having already decided she will do whatever he wants.
-
-**Institutional response:** You told an adult child something the patient's wife had asked the team not to say.
-
-**Ethical interpretation:** Nora can act now instead of guessing. You told her before her father had the chance to.
-
-**Delayed (at node `discharge-day`):** Nora moved the ceremony forward by three days and told her father herself. *(Clinical well-being +1)*
-
-### Choice 4 `tm-keep-positive`
-
-**Run the meeting the way Ellen has asked, and keep it on treatment.**
-
-*Effects: Operational efficiency +2, Risk and compliance +2, Professional integrity -3, Agency and dignity -2*
-
-*Next: → `discharge-day`*
-
-**Immediate:** The meeting is calm and short. The plan on paper is the fourth round of chemotherapy. Nora leaves without asking her question again.
-
-**Institutional response:** A calm family, an agreed plan, and a meeting that finished early. This is what a good family meeting looks like on paper.
-
-**Ethical interpretation:** Everyone left the room comfortable except the person the meeting was about.
-
-**Delayed (at node `discharge-day`):** Nora went home and continued planning the wedding as before. Daniel did not tell her anything. *(Trust and therapeutic relationship -1)*
 
 ## Node: The last decision `discharge-day`
 
@@ -592,7 +464,7 @@ This is the last morning it is possible to send him home before the wedding. He 
 
 *Effects: Agency and dignity +3, Trust and therapeutic relationship +2, Risk and compliance -3, Operational efficiency -2, Personal sustainability -1*
 
-*Next: if ? → `ending-removed`; if Clinical well-being < -1 → `ending-died-on-the-way`; if Agency and dignity ≥ 4 AND Trust and therapeutic relationship ≥ 2 → `ending-home-informed`; → `ending-home-unspoken`*
+*Next: if ? → `ending-removed`; if Clinical well-being < -2 → `ending-died-on-the-way`; if Agency and dignity ≥ 4 AND Trust and therapeutic relationship ≥ 2 → `ending-home-informed`; → `ending-home-unspoken`*
 
 **Immediate:** The transport leaves at eleven. Ellen goes with him and does not speak to you before she goes.
 
@@ -608,7 +480,7 @@ This is the last morning it is possible to send him home before the wedding. He 
 
 *Effects: Agency and dignity +2, Trust and therapeutic relationship +1, Quality of care +2, Professional integrity +1, Risk and compliance -2, Operational efficiency -2*
 
-*Next: if ? → `ending-removed`; if Clinical well-being < -2 → `ending-died-on-the-way`; if Agency and dignity ≥ 3 → `ending-home-informed`; → `ending-home-unspoken`*
+*Next: if ? → `ending-removed`; if Clinical well-being < -3 → `ending-died-on-the-way`; if Agency and dignity ≥ 3 → `ending-home-informed`; → `ending-home-unspoken`*
 
 **Immediate:** You write the medication plan, the number to call, and what will happen if he dies at home. Ellen reads it twice in the corridor.
 
@@ -624,7 +496,7 @@ This is the last morning it is possible to send him home before the wedding. He 
 
 *Effects: Risk and compliance +3, Operational efficiency +1, Agency and dignity -3, Trust and therapeutic relationship -2, Professional integrity -1*
 
-*Next: if ? → `ending-removed`; if chose `ar-support` → `ending-hospital-treatment`; if chose `tm-keep-positive` → `ending-hospital-treatment`; if Agency and dignity ≥ 2 → `ending-hospital-honest`; → `ending-hospital-treatment`*
+*Next: if ? → `ending-removed`; if chose `ar-support` → `ending-hospital-treatment`; if chose `co-agree` → `ending-hospital-treatment`; if Agency and dignity ≥ 0 → `ending-hospital-honest`; → `ending-hospital-treatment`*
 
 **Immediate:** He says all right. Ellen thanks you. He asks the nurse to close the curtain.
 

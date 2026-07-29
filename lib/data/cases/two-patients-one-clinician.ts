@@ -14,7 +14,7 @@ import type { ClinicalCase } from "../../types";
  */
 export const twoPatientsOneClinician: ClinicalCase = {
   id: "two-patients-one-clinician",
-  caseVersion: 7,
+  caseVersion: 8,
   title: "Two patients, one clinician",
   setting: "Emergency department, understaffed overnight shift",
   difficulty: "advanced",
@@ -695,7 +695,7 @@ export const twoPatientsOneClinician: ClinicalCase = {
           next: [
             {
               when: { any: [{ chose: "ef-swap" }, { chose: "pb-hold-line" }, { chose: "pb-float" }] },
-              nodeId: "swap-back",
+              nodeId: "daughter-call",
               reason: "Nurse Nair has been running Eleanor's treatment, so you check her orders next",
             },
             { nodeId: "sepsis-hour" },
@@ -743,7 +743,7 @@ export const twoPatientsOneClinician: ClinicalCase = {
           next: [
             {
               when: { any: [{ chose: "ef-swap" }, { chose: "pb-hold-line" }, { chose: "pb-float" }] },
-              nodeId: "swap-back",
+              nodeId: "daughter-call",
               reason: "Nurse Nair has been running Eleanor's treatment, so you check her orders next",
             },
             { nodeId: "sepsis-hour" },
@@ -792,7 +792,7 @@ export const twoPatientsOneClinician: ClinicalCase = {
           next: [
             {
               when: { any: [{ chose: "ef-swap" }, { chose: "pb-hold-line" }, { chose: "pb-float" }] },
-              nodeId: "swap-back",
+              nodeId: "daughter-call",
               reason: "Nurse Nair has been running Eleanor's treatment, so you check her orders next",
             },
             { nodeId: "sepsis-hour" },
@@ -1080,137 +1080,6 @@ export const twoPatientsOneClinician: ClinicalCase = {
                 text:
                   "Your examination found a second source of infection. The " +
                   "antibiotics started later than planned.",
-                deliver: { atNodeId: "the-chart" },
-              },
-            ],
-          },
-          next: [{ nodeId: "daughter-call" }],
-        },
-      ],
-    },
-    /* ------------------------------------------------------------ */
-    {
-      id: "swap-back",
-      title: "Checking the orders",
-      timeOfDay: "night",
-      timerSeconds: 28,
-      scene: {
-        setting: "ed",
-        present: ["eleanor", "nurse", "clinician"],
-        moods: { eleanor: "exhausted", nurse: "uncertain" },
-        focus: "eleanor",
-        wallClock: true,
-      },
-      situation:
-        "You come back to Eleanor's bay. Nurse Nair has run the treatment on " +
-        "your verbal orders. Fluids right, samples drawn, antibiotics hanging. " +
-        "The dose on the pump is the standard one and Eleanor's kidney results " +
-        "call for a lower one. Your order was the problem.",
-      choices: [
-        {
-          id: "sb-recheck",
-          label: "Recheck the orders with Nurse Nair and correct the dose now.",
-          timeCost: 6,
-          effects: {
-            qualityOfCare: 2,
-            operationalEfficiency: -1,
-          },
-          patientEffects: {
-            eleanor: {
-              clinicalWellbeing: 2,
-            },
-          },
-          feedback: {
-            immediate:
-              "You go through it together and the dose is fixed in two minutes.",
-            institutional:
-              "Six minutes the hospital cannot bill, and the only real safety " +
-              "check that happened tonight.",
-            ethical:
-              "The error was in your rushed order and the correction said so. " +
-              "Catching your own mistake is the cheapest patient safety measure " +
-              "there is.",
-            delayed: [
-              {
-                id: "dose-caught",
-                text:
-                  "The dose error was corrected before it reached Eleanor. " +
-                  "Nurse Nair filed the correction herself.",
-                deliver: { atNodeId: "the-chart" },
-              },
-            ],
-          },
-          next: [{ nodeId: "daughter-call" }],
-        },
-        {
-          id: "sb-trust",
-          label:
-            "Glance at the numbers, thank her, and move on to the waiting room.",
-          timeCost: 2,
-          timeSaver: true,
-          effects: {
-            operationalEfficiency: 2,
-            qualityOfCare: -2,
-          },
-          patientEffects: {
-            eleanor: {
-              clinicalWellbeing: -3,
-            },
-          },
-          feedback: {
-            immediate:
-              "You are three charts away when the pharmacy calls about the " +
-              "kidney dose. Eleanor has had two hours of a dose her kidneys " +
-              "cannot clear.",
-            institutional:
-              "The near miss will not appear in any report, because reporting it " +
-              "means explaining the hour that produced it.",
-            ethical:
-              "Skipping the check was not about trusting the nurse. It was about " +
-              "being tired with nineteen people waiting. The system caught it " +
-              "late, and Eleanor absorbed the difference.",
-            delayed: [
-              {
-                id: "dose-missed",
-                text:
-                  "The dose error reached Eleanor. It was found on the " +
-                  "morning medication review.",
-                deliver: { atNodeId: "the-chart" },
-              },
-            ],
-          },
-          next: [{ nodeId: "daughter-call" }],
-        },
-        {
-          id: "sb-takeover",
-          label: "Take the bedside back and send Nurse Nair to the waiting room.",
-          timeCost: 4,
-          effects: {
-            qualityOfCare: 1,
-          },
-          patientEffects: {
-            eleanor: {
-              clinicalWellbeing: 1,
-            },
-            marcus: {
-              trustRelationship: -1,
-            },
-          },
-          feedback: {
-            immediate:
-              "You take over, catch the dosing problem yourself, and fix it. " +
-              "Nurse Nair starts working through the waiting room.",
-            institutional:
-              "Normal roles restored and the board moving again.",
-            ethical:
-              "Eleanor is safe and the waiting room is moving. Marcus is on " +
-              "his own again.",
-            delayed: [
-              {
-                id: "nair-request",
-                text:
-                  "You ran the bedside yourself. Nurse Nair requested not to " +
-                  "be assigned with you again.",
                 deliver: { atNodeId: "the-chart" },
               },
             ],
@@ -1933,7 +1802,6 @@ function ENDINGS() {
       when: {
         all: [
           { not: { visited: "removal-unfolds" } },
-          { clockBelow: 55 },
           {
             patientMetricAtLeast: ["marcus", "agencyDignity", 1] as [
               string,
@@ -1951,11 +1819,11 @@ function ENDINGS() {
         ],
       },
       nodeId: "ending-both-held",
-      reason: "Nobody was removed, Eleanor was treated in time, and both patients kept their trust in you",
+      reason: "Nobody was removed and both patients kept their trust in you",
     },
     {
       when: {
-        all: [{ not: { visited: "removal-unfolds" } }, { clockAtLeast: 55 }],
+        all: [{ not: { visited: "removal-unfolds" } }, { clockAtLeast: 24 }],
       },
       nodeId: "ending-swap-cost",
       reason: "Marcus stayed and was cared for, and Eleanor's treatment paid for it in time",

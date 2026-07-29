@@ -6,8 +6,8 @@ the top of each file.
 
 | Case | Status | Nodes | Modes | Scoring |
 | --- | --- | ---: | --- | --- |
-| [Two patients, one clinician](./two-patients-one-clinician.md) | draft | 17 | deliberative, timed | standard |
-| [When everyone says keep fighting](./when-everyone-says-keep-fighting.md) | draft | 14 | deliberative | standard |
+| [Two patients, one clinician](./two-patients-one-clinician.md) | draft | 16 | deliberative, timed | standard |
+| [When everyone says keep fighting](./when-everyone-says-keep-fighting.md) | draft | 12 | deliberative | standard |
 | [A routine visit, an unroutine gap](./routine-clinic-visit.md) | draft | 8 | deliberative | standard |
 
 ## What review changes
