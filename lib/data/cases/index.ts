@@ -1,6 +1,7 @@
 import type { ClinicalCase } from "../../types";
 import { routineClinicVisit } from "./routine-clinic-visit";
 import { twoPatientsOneClinician } from "./two-patients-one-clinician";
+import { thePlan75Consultation } from "./the-plan-75-consultation";
 import { whenEveryoneSaysKeepFighting } from "./when-everyone-says-keep-fighting";
 
 /**
@@ -10,6 +11,7 @@ import { whenEveryoneSaysKeepFighting } from "./when-everyone-says-keep-fighting
 export const cases: ClinicalCase[] = [
   twoPatientsOneClinician,
   whenEveryoneSaysKeepFighting,
+  thePlan75Consultation,
   routineClinicVisit,
 ];
 

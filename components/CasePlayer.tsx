@@ -1073,8 +1073,9 @@ function Results({
         <div className="mt-6 rounded-2xl border border-[#E7D6C4] bg-white p-5">
           <h2 className="text-lg font-semibold text-[#3A2B26]">How the encounter went</h2>
           <p className="mt-1 text-sm text-[#7A6A5E]">
-            Each patient is scored separately, so strong care for one never hides
-            harm to the other. Click any row to see the measures underneath it.
+            {isMultiPatient(c)
+              ? "Each patient is scored separately, so strong care for one never hides harm to the other. Click any row to see the measures underneath it."
+              : "Click any row to see the measures underneath it."}
           </p>
           <div className="mt-4 space-y-4">
             {rows.map((row) => {
