@@ -772,6 +772,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           </div>
         )}
 
+        {phase.kind === "node" && (
         <div className="mt-5 rounded-2xl border border-[#E7D6C4] bg-white p-6">
           <p className="text-lg leading-relaxed text-[#3A2B26]">{situation}</p>
 
@@ -802,6 +803,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
             </div>
           )}
         </div>
+        )}
 
         {phase.kind === "node" && (
           <div className="mt-5 space-y-3">
@@ -992,11 +994,6 @@ function FeedbackPanel({
         <p className="mt-1 leading-relaxed text-[#3A2B26]">{choice.feedback.ethical}</p>
       </div>
 
-      {choice.feedback.delayed && choice.feedback.delayed.length > 0 && (
-        <p className="text-sm italic text-[#7A6A5E]">
-          Some consequences of this choice will surface later…
-        </p>
-      )}
 
       <button
         onClick={onContinue}
