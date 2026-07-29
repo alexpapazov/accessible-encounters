@@ -1007,7 +1007,7 @@ function FeedbackPanel({
 
 /* ------------------------------------------------------------------ */
 
-function Results({
+export function Results({
   clinicalCase: c,
   mode,
   metrics,

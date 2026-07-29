@@ -171,7 +171,15 @@ export default function DashboardPage() {
               );
               const isOpen = expanded === a.id;
               return (
-                <div key={a.id} className="rounded-xl border border-[#E7D6C4] bg-white p-4">
+                <div
+                  key={a.id}
+                  className="rounded-xl border border-[#E7D6C4] bg-white p-4 transition-colors hover:border-[#E88C6E]"
+                >
+                  <Link
+                    href={`/dashboard/attempt/${a.id}/outcome`}
+                    className="block rounded-lg"
+                    aria-label={`Open the ending screen for your ${c.title} attempt`}
+                  >
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="font-medium text-[#3A2B26]">
                       {c.title}
@@ -216,6 +224,7 @@ export default function DashboardPage() {
                       );
                     })}
                   </div>
+                  </Link>
                   <div className="mt-3 flex flex-wrap items-center gap-3">
                     <Link
                       href={`/dashboard/attempt/${a.id}`}

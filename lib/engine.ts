@@ -222,7 +222,12 @@ export function replayPrefix(
       patients = due.reduce((ps, d) => applyPatientEffects(ps, d.patientEffects), patients);
     }
 
-    metrics = applyEffects(metrics, step.effectsApplied);
+    // Must mirror CasePlayer.choose(): in multi-patient cases the shared
+    // metrics take the per-patient effects too, or a replay under-counts them.
+    metrics = applyEffects(
+      metrics,
+      mergePatientEffects(step.effectsApplied, step.patientEffectsApplied)
+    );
     patients = applyPatientEffects(patients, step.patientEffectsApplied);
     clock = step.scenarioClockAfter;
 
@@ -244,6 +249,58 @@ export function replayPrefix(
     path: prefix,
     queue,
   };
+}
+
+/**
+ * Rebuild the FINAL state of a completed attempt from its saved path.
+ *
+ * replayPrefix stops at a decision node because branching hands control back
+ * there. A finished attempt needs one more step: resolve the last choice to the
+ * terminal node and deliver whatever came due on arriving at it, which is what
+ * the Aftermath panel shows. Use this to reopen an ending, not replayPrefix.
+ */
+export function replayComplete(
+  c: ClinicalCase,
+  path: PathStep[]
+): {
+  nodeId: string;
+  metrics: MetricState;
+  patients: Record<string, MetricState>;
+  clock: number;
+  path: PathStep[];
+  aftermath: DelayedOutcome[];
+} {
+  const st = replayPrefix(c, path, path.length);
+  if (!path.length) return { ...st, aftermath: [] };
+
+  const last = path[path.length - 1];
+  const node = nodeById(c, last.nodeId);
+  const res = last.resolution;
+  const rules =
+    "choiceId" in res
+      ? node.choices.find((ch) => ch.id === res.choiceId)?.next
+      : node.inactionOutcome?.next;
+  if (!rules) return { ...st, aftermath: [] };
+
+  const endId = resolveNext(rules, {
+    metrics: st.metrics,
+    scenarioClock: st.clock,
+    path: st.path,
+    patients: st.patients,
+  }).nodeId;
+
+  // Arriving at the terminal node delivers anything still due.
+  const due = [
+    ...dueDelayed(st.queue, { kind: "node", nodeId: endId }),
+    ...dueDelayed(st.queue, { kind: "clock", minutes: st.clock }),
+  ];
+  const metrics = due.reduce(
+    (m, d) => applyEffects(m, mergePatientEffects(d.effects ?? {}, d.patientEffects)),
+    st.metrics
+  );
+  const patients = due.reduce((ps, d) => applyPatientEffects(ps, d.patientEffects), st.patients);
+
+  return { nodeId: endId, metrics, patients, clock: st.clock, path: st.path, aftermath: due };
 }
 
 /** Sum metric values per stakeholder for rollup displays. */
