@@ -103,8 +103,10 @@ from any of them is quoted in the case.
 - **Martin Welsh, *Laugh to Death: My Rx for Dying Well with ALS*.** A physician
   diagnosed with ALS in 2004 who wrote update emails to family and turned them
   into a book, more often irreverent than solemn. He died in 2010.
-  **In the case:** Daniel's funeral joke is his own agency. Meeting it is
-  scored as care; filing it as a mood symptom is scored as a loss.
+  **In the case:** Daniel plans his own funeral and says so plainly. Meeting
+  that is scored as care; filing it as a mood symptom is scored as a loss.
+  NOTE: written without humour. The owner rejected a joking version outright
+  (style guide 27k), so the agency shows in him directing it, not in wit.
 
 ## Built
 

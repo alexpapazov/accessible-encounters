@@ -230,7 +230,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Operational efficiency +2, Risk and compliance +1, Professional integrity -2, Clinical well-being -2, Agency and dignity -1*
 
-*Next: → `the-joke`*
+*Next: → `the-arrangements`*
 
 **Immediate:** The first dose is booked for tomorrow. Ellen writes the date on the whiteboard in his room.
 
@@ -246,7 +246,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Agency and dignity +2, Trust and therapeutic relationship +1, Professional integrity +1, Operational efficiency -2, Risk and compliance -1*
 
-*Next: → `the-joke`*
+*Next: → `the-arrangements`*
 
 **Immediate:** The oncologist gives the number. Daniel asks what the two weeks would be like, and gets an answer to that as well. Ellen says nothing for the rest of the conversation.
 
@@ -262,7 +262,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Professional integrity +2, Agency and dignity +1, Clinical well-being +1, Risk and compliance -2, Operational efficiency -2*
 
-*Next: → `the-joke`*
+*Next: → `the-arrangements`*
 
 **Immediate:** The oncologist does not contradict you and does not thank you. Ellen asks whether you are telling her husband to give up.
 
@@ -278,7 +278,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 *Effects: Operational efficiency +1, Risk and compliance +2, Professional integrity -1, Agency and dignity -2, Trust and therapeutic relationship -1*
 
-*Next: → `the-joke`*
+*Next: → `the-arrangements`*
 
 **Immediate:** Ellen answers most of the oncologist's questions. The regimen is booked. Daniel agrees to it at the end without asking anything further.
 
@@ -288,7 +288,7 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 **Delayed (at node `going-home`):** Daniel later told Nurse Okafor that he had agreed to the treatment because Ellen wanted it. *(Agency and dignity -1)*
 
-## Node: The joke `the-joke`
+## Node: What he has been planning `the-arrangements`
 
 *day 2 · afternoon · present — Daniel Mercer, You · Daniel Mercer: engaged*
 
@@ -296,29 +296,29 @@ The oncologist proposes a fourth round using a different drug. In the corridor b
 
 **Situation:**
 
-Daniel is alone for once. He tells you he has been planning his funeral music and that he wants the song about the gambler rather than a hymn. He is joking, and he is also watching to see what you do with it. Nurse Okafor has written in the notes that he seems low in mood.
+Daniel is alone for once. He tells you he has been planning his own funeral and has already decided most of it. He is not upset and he is not asking you for anything. He says nobody at home will let him finish a sentence about it. Nurse Okafor has written in the notes that he seems low in mood.
 
 **Daniel Mercer's view:**
 
-> Daniel is testing whether you can talk about this without flinching. The joke is the only way he has been able to raise it since Ellen made her request.
+> Daniel has been working this out for weeks and has had nowhere to say it. He is watching to see whether you stay in the conversation or move him on.
 
-### Choice 1 `tj-follow`
+### Choice 1 `fu-follow`
 
-**Laugh, and ask him what else he has planned.**
+**Ask him what he has decided.**
 
 *Effects: Quality of care -1, Agency and dignity +2, Trust and therapeutic relationship +2, Clinical well-being +1, Operational efficiency -1, Risk and compliance -1*
 
 *Next: → `the-night`*
 
-**Immediate:** He has thought about most of it. He has not told anyone in his family any of it. He asks you not to repeat it yet.
+**Immediate:** He has decided most of it. He has not told anyone in his family any of it. He asks you not to repeat it yet.
 
 **Institutional response:** None of this is documented anywhere and none of it is billable.
 
-**Ethical interpretation:** He got to be the one running the conversation about his own death. You are now holding something his wife does not know.
+**Ethical interpretation:** He got to finish the conversation he has been trying to have. You are now holding something his wife does not know.
 
-**Delayed (at node `discharge-day`):** Daniel wrote his list down and kept it in the drawer beside the bed. He mentioned it again on the last morning. *(Agency and dignity +1)*
+**Delayed (at node `discharge-day`):** Daniel wrote his instructions down and kept them in the drawer beside the bed. He mentioned them again on the last morning. *(Agency and dignity +1)*
 
-### Choice 2 `tj-redirect`
+### Choice 2 `fu-redirect`
 
 **Bring him back to his pain and his eating.**
 
@@ -326,7 +326,7 @@ Daniel is alone for once. He tells you he has been planning his funeral music an
 
 *Next: → `the-night`*
 
-**Immediate:** He answers the questions about his pain. He does not go back to the joke.
+**Immediate:** He answers the questions about his pain. He does not go back to what he was saying.
 
 **Institutional response:** This is a clean, efficient review of symptoms and it is what the round is for.
 
@@ -334,7 +334,7 @@ Daniel is alone for once. He tells you he has been planning his funeral music an
 
 **Delayed (at node `discharge-day`):** Daniel did not raise his funeral with any member of staff again. *(Trust and therapeutic relationship -1)*
 
-### Choice 3 `tj-flag`
+### Choice 3 `fu-flag`
 
 **Take it as a warning sign and refer him for a mental health review.**
 
@@ -348,7 +348,7 @@ Daniel is alone for once. He tells you he has been planning his funeral music an
 
 **Ethical interpretation:** You treated the one thing he was doing for himself as a symptom of something wrong with him.
 
-**Delayed (at node `discharge-day`):** The mental health team found no illness and closed the referral. Daniel stopped joking with staff. *(Agency and dignity -1)*
+**Delayed (at node `discharge-day`):** The mental health team found no illness and closed the referral. Daniel stopped raising it with staff. *(Agency and dignity -1)*
 
 ## Node: Two in the morning `the-night`
 
@@ -773,5 +773,5 @@ The oncologist tells you the family has asked for a different doctor and that th
 - **Leo Tolstoy, The Death of Ivan Ilyich** — Ivan Ilyich is tormented less by the illness than by the arrangement everyone around him keeps, that he is ill rather than dying. Gerasim is the only person who says otherwise and the only one who gives him physical relief. Ellen's request is that arrangement, and every node asks whether you will join it.
 - **Atul Gawande, Being Mortal** — Gawande's patient Joseph Lazaroff chose a dangerous operation that could never return what he actually wanted, and Gawande's regret is that the team explained the risks carefully while never discussing the reality of the disease. The fourth regimen is that offer, and the hospital ending is that outcome.
 - **Annabelle Gurwitch, The End of My Life Is Killing Me** — Gurwitch refuses the cancer warrior identity in favour of what she calls a cancer slacker, with no runs, no ribbons, and no religion. Ellen calls Daniel a fighter. The case treats that word as something placed on him rather than chosen by him.
-- **Martin Welsh, Laugh to Death** — Welsh was a physician who wrote about dying with ALS more often irreverently than solemnly. Daniel's funeral joke is his, and the case scores whether it is met as agency or filed as a symptom.
+- **Martin Welsh, Laugh to Death** — Welsh was a physician who kept writing about his own dying with ALS on his own terms. Daniel's funeral planning is his in the same way, and the case scores whether it is met as agency or filed as a symptom.
 - **Kathleen Watt, Rearranged and course Q and A** — Watt describes two surgical teams separated by whether they explained and shared the decision, and says caregiving includes interpreting a patient to herself. Her account of being recorded as hallucinating when she was simply without her glasses sits behind the mental health referral choice.

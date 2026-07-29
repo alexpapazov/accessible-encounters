@@ -167,6 +167,14 @@ clinician" (8 Word comments + chat notes).
     lands on is never in the path and any such condition silently never fires.
     Key epilogue text off the same conditions the ending routing uses, and
     verify that each ending maps to exactly one reflection per character.
+27k. **Never write humour, jokes, or comic beats.** Owner: "this whole gambler
+    thing is really funky and weird I don't like it, do not try to be funny."
+    - ✗ "Tell them no hymns. I want the one about the gambler."
+    - ✓ "I have most of it worked out. Nobody at home will let me finish."
+    A patient may talk about his own death plainly and on his own terms. That
+    is agency and it needs no punchline. No song titles, no pop-culture
+    references, no wry asides. This is rule 1 applied to tone: a joke is the
+    most quirky thing a line can be.
 27j. **No metric effects on delayed outcomes delivered at an ending.** Routing
     resolves before those land, so an effect there can make the epilogue
     disagree with the ending the player was given.

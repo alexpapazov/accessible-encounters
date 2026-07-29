@@ -7,7 +7,8 @@ import type { ClinicalCase, NextRule } from "../../types";
  * design/scenario-keep-fighting-readings.md. Tolstoy supplies the arrangement
  * everyone agrees to, that the patient is ill rather than dying. Gawande
  * supplies the treatment offered in place of an honest conversation. Gurwitch
- * and Welsh supply the humour as the patient's own, never as a symptom. Watt
+ * and Welsh supply the patient directing his own death instead of being handed
+ * the fighter script. Watt
  * supplies trust as the thing spent or earned in single conversations.
  *
  * Scoring note: death is never the failure here. Clinical well-being means
@@ -40,7 +41,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
       id: "daniel",
       name: "Daniel Mercer",
       role: "patient",
-      archetype: "gurney-patient",
+      archetype: "gurney-patient-m",
       bio:
         "Daniel Mercer: fifty-eight, a building inspector. He has pancreatic " +
         "cancer that has spread to his liver. Three rounds of chemotherapy " +
@@ -495,7 +496,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-joke" }],
+          next: [{ nodeId: "the-arrangements" }],
         },
         {
           id: "ar-odds",
@@ -530,7 +531,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-joke" }],
+          next: [{ nodeId: "the-arrangements" }],
         },
         {
           id: "ar-oppose",
@@ -564,7 +565,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-joke" }],
+          next: [{ nodeId: "the-arrangements" }],
         },
         {
           id: "ar-quiet",
@@ -598,14 +599,14 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               },
             ],
           },
-          next: [{ nodeId: "the-joke" }],
+          next: [{ nodeId: "the-arrangements" }],
         },
       ],
     },
     /* ------------------------------------------------------------ */
     {
-      id: "the-joke",
-      title: "The joke",
+      id: "the-arrangements",
+      title: "What he has been planning",
       day: 2,
       timeOfDay: "afternoon",
       inlineCaption: "Later that afternoon",
@@ -617,29 +618,29 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         bubbles: [
           {
             characterId: "daniel",
-            text: "Tell them no hymns. I want the one about the gambler.",
+            text: "I have most of it worked out. Nobody at home will let me finish.",
           },
         ],
       },
       situation:
-        "Daniel is alone for once. He tells you he has been planning his " +
-        "funeral music and that he wants the song about the gambler rather " +
-        "than a hymn. He is joking, and he is also watching to see what you do " +
-        "with it. Nurse Okafor has written in the notes that he seems low in " +
-        "mood.",
+        "Daniel is alone for once. He tells you he has been planning his own " +
+        "funeral and has already decided most of it. He is not upset and he is " +
+        "not asking you for anything. He says nobody at home will let him " +
+        "finish a sentence about it. Nurse Okafor has written in the notes " +
+        "that he seems low in mood.",
       perspectives: [
         {
           characterId: "daniel",
           text:
-            "Daniel is testing whether you can talk about this without " +
-            "flinching. The joke is the only way he has been able to raise it " +
-            "since Ellen made her request.",
+            "Daniel has been working this out for weeks and has had nowhere " +
+            "to say it. He is watching to see whether you stay in the " +
+            "conversation or move him on.",
         },
       ],
       choices: [
         {
-          id: "tj-follow",
-          label: "Laugh, and ask him what else he has planned.",
+          id: "fu-follow",
+          label: "Ask him what he has decided.",
           effects: {
             qualityOfCare: -1,
             agencyDignity: 2,
@@ -650,19 +651,20 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           },
           feedback: {
             immediate:
-              "He has thought about most of it. He has not told anyone in his " +
-              "family any of it. He asks you not to repeat it yet.",
+              "He has decided most of it. He has not told anyone in his family " +
+              "any of it. He asks you not to repeat it yet.",
             institutional:
               "None of this is documented anywhere and none of it is billable.",
             ethical:
-              "He got to be the one running the conversation about his own " +
-              "death. You are now holding something his wife does not know.",
+              "He got to finish the conversation he has been trying to have. " +
+              "You are now holding something his wife does not know.",
             delayed: [
               {
-                id: "tj-follow-after",
+                id: "fu-follow-after",
                 text:
-                  "Daniel wrote his list down and kept it in the drawer beside " +
-                  "the bed. He mentioned it again on the last morning.",
+                  "Daniel wrote his instructions down and kept them in the " +
+                  "drawer beside the bed. He mentioned them again on the last " +
+                  "morning.",
                 deliver: { atNodeId: "discharge-day" },
                 effects: { agencyDignity: 1 },
               },
@@ -671,7 +673,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           next: [{ nodeId: "the-night" }],
         },
         {
-          id: "tj-redirect",
+          id: "fu-redirect",
           label: "Bring him back to his pain and his eating.",
           effects: {
             operationalEfficiency: 1,
@@ -682,7 +684,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           feedback: {
             immediate:
               "He answers the questions about his pain. He does not go back to " +
-              "the joke.",
+              "what he was saying.",
             institutional:
               "This is a clean, efficient review of symptoms and it is what the " +
               "round is for.",
@@ -691,7 +693,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "about his death and was moved on to his appetite.",
             delayed: [
               {
-                id: "tj-redirect-after",
+                id: "fu-redirect-after",
                 text:
                   "Daniel did not raise his funeral with any member of staff " +
                   "again.",
@@ -703,7 +705,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
           next: [{ nodeId: "the-night" }],
         },
         {
-          id: "tj-flag",
+          id: "fu-flag",
           label: "Take it as a warning sign and refer him for a mental health review.",
           effects: {
             riskCompliance: 2,
@@ -723,10 +725,10 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
               "of something wrong with him.",
             delayed: [
               {
-                id: "tj-flag-after",
+                id: "fu-flag-after",
                 text:
                   "The mental health team found no illness and closed the " +
-                  "referral. Daniel stopped joking with staff.",
+                  "referral. Daniel stopped raising it with staff.",
                 deliver: { atNodeId: "discharge-day" },
                 effects: { agencyDignity: -1 },
               },
@@ -1686,9 +1688,10 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
     {
       source: "Martin Welsh, Laugh to Death",
       connection:
-        "Welsh was a physician who wrote about dying with ALS more often " +
-        "irreverently than solemnly. Daniel's funeral joke is his, and the " +
-        "case scores whether it is met as agency or filed as a symptom.",
+        "Welsh was a physician who kept writing about his own dying with ALS " +
+        "on his own terms. Daniel's funeral planning is his in the same way, " +
+        "and the case scores whether it is met as agency or filed as a " +
+        "symptom.",
     },
     {
       source: "Kathleen Watt, Rearranged and course Q and A",

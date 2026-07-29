@@ -173,7 +173,9 @@ export type CharacterArchetype =
   | "nurse"
   | "security"
   | "supervisor"
-  | "gurney-patient";
+  | "gurney-patient"
+  /** Same bed, a man: short dark hair, beard, warmer skin, green blanket. */
+  | "gurney-patient-m";
 
 export interface Character {
   id: string;

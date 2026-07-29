@@ -231,7 +231,13 @@ function VriCart({ mood }: { mood: Mood }) {
  * Patient in a semi-reclined hospital bed, centered on x=0. The raised
  * backrest lets the face read naturally while clearly "in bed."
  */
-function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Mood; skin?: string; hair?: string }) {
+function GurneyPatient({ mood, male = false }: { mood: Mood; male?: boolean }) {
+  const skin = male ? "#C98B5E" : "#E8C49E";
+  const hair = male ? "#33262A" : "#C9C4BC";
+  const gown = male ? "#DCE0D6" : "#D8E4E8";
+  const gownShade = male ? "#CBD2C3" : "#C9DAE2";
+  const blanket = male ? "#C4CEBB" : "#BFD3DC";
+  const blanketLine = male ? "#AEB9A4" : "#A8BEC8";
   return (
     <g>
       {/* legs + wheels */}
@@ -248,33 +254,48 @@ function GurneyPatient({ mood, skin = "#E8C49E", hair = "#C9C4BC" }: { mood: Moo
         <rect x="-52" y="194" width="20" height="26" rx="9" fill="#FDFBF7" stroke="#E4DDD1" strokeWidth="1" />
       </g>
       {/* patient sitting up: upright torso and head, fully frontal */}
-      <rect x="-49" y="211" width="32" height="42" rx="12" fill="#D8E4E8" />
+      <rect x="-49" y="211" width="32" height="42" rx="12" fill={gown} />
       {/* shoulder: a sloped cap, so the arm leaves the body without bulging */}
-      <path
-        d="M-49 232 Q-50 219 -40 216 L-36 224 Q-44 227 -44 234 Z"
-        fill="#C9DAE2"
-      />
+      <path d="M-49 232 Q-50 219 -40 216 L-36 224 Q-44 227 -44 234 Z" fill={gownShade} />
       <rect x="-38" y="203" width="10" height="13" rx="4" fill={skin} />
       <circle cx="-33" cy="194" r="14" fill={skin} />
-      {/* one continuous band of hair, over the crown and down to the jaw */}
-      <path
-        d="M-48 209 C-50 194 -46 177 -33 177 C-20 177 -16 194 -18 209
-           L-23 209 C-21 196 -24 186 -33 186 C-42 186 -45 196 -43 209 Z"
-        fill={hair}
-      />
+      {male ? (
+        <>
+          {/* short cap with sideburns, kept clear of the brows at y 191 */}
+          <path
+            d="M-46 194 C-49 184 -45 172 -33 172 C-21 172 -17 184 -20 194
+               L-24 194 C-23 187 -26 183 -33 183 C-40 183 -43 187 -42 194 Z"
+            fill={hair}
+          />
+          {/* short beard along the jaw, below the mouth line at y 200 */}
+          <path
+            d="M-45 198 C-44 207 -39 211 -33 211 C-27 211 -22 207 -21 198
+               C-24 204 -42 204 -45 198 Z"
+            fill={hair}
+            fillOpacity={0.9}
+          />
+        </>
+      ) : (
+        /* one continuous band of hair, over the crown and down to the jaw */
+        <path
+          d="M-48 209 C-50 194 -46 177 -33 177 C-20 177 -16 194 -18 209
+             L-23 209 C-21 196 -24 186 -33 186 C-42 186 -45 196 -43 209 Z"
+          fill={hair}
+        />
+      )}
       {/* Face is drawn around its own origin, then placed inside the head. */}
       <g transform="translate(-33 196) scale(0.62)">
         <Face hx={0} hy={0} mood={mood} skin={skin} />
       </g>
       {/* blanket over the lap, with knee mound and foot bump */}
-      <ellipse cx="18" cy="238" rx="15" ry="7" fill="#BFD3DC" />
-      <rect x="-30" y="236" width="90" height="17" rx="8" fill="#BFD3DC" />
-      <ellipse cx="52" cy="240" rx="8" ry="5" fill="#BFD3DC" />
-      <line x1="-26" y1="248" x2="56" y2="248" stroke="#A8BEC8" strokeWidth="1.5" />
+      <ellipse cx="18" cy="238" rx="15" ry="7" fill={blanket} />
+      <rect x="-30" y="236" width="90" height="17" rx="8" fill={blanket} />
+      <ellipse cx="52" cy="240" rx="8" ry="5" fill={blanket} />
+      <line x1="-26" y1="248" x2="56" y2="248" stroke={blanketLine} strokeWidth="1.5" />
       {/* arm running from the shoulder across the lap, in a darker sleeve tone */}
       <path
         d="M-46 229 Q-47 237 -36 238 L-12 238"
-        stroke="#C9DAE2"
+        stroke={gownShade}
         strokeWidth="10"
         fill="none"
         strokeLinecap="round"
@@ -449,8 +470,8 @@ export default function BasicScene({
               <MayaSeated mood={m} />
             ) : ch.archetype === "vri-interpreter" ? (
               <VriCart mood={m} />
-            ) : ch.archetype === "gurney-patient" ? (
-              <GurneyPatient mood={m} />
+            ) : ch.archetype === "gurney-patient" || ch.archetype === "gurney-patient-m" ? (
+              <GurneyPatient mood={m} male={ch.archetype === "gurney-patient-m"} />
             ) : (
               <StandingFigure
                 style={ARCHETYPE_STYLES[ch.archetype] ?? ARCHETYPE_STYLES["adult-m"]}
