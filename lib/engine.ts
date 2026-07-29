@@ -66,7 +66,7 @@ export function resolveNext(rules: NextRule[], ctx: EvalContext): NextRule {
   for (const rule of rules) {
     if (!rule.when || evalCondition(rule.when, ctx)) return rule;
   }
-  throw new Error("No next rule matched — case data must end rule lists with an unconditional rule");
+  throw new Error("No next rule matched: case data must end rule lists with an unconditional rule");
 }
 
 /**

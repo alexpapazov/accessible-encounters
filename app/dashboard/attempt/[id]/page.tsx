@@ -275,7 +275,7 @@ function StepView({
 
       <div className="mt-4 rounded-2xl border border-[#E7D6C4] bg-white p-5">
         <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
-          {node.title} — as you saw it
+          {node.title}, as you saw it
         </p>
         <p className="mt-1 leading-relaxed text-[#3A2B26]">{shownSituation}</p>
         {hadUnseen && (
@@ -360,7 +360,7 @@ function StepView({
                 )}
                 <div className="rounded-xl border-l-4 border-[#8A5A44] bg-[#FBF3E9] p-4">
                   <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
-                    What this choice protected — and risked
+                    What this choice protected and risked
                   </p>
                   <p className="mt-1 leading-relaxed text-[#3A2B26]">{fb.ethical}</p>
                 </div>
@@ -405,7 +405,7 @@ function StepView({
             </Link>
           </div>
           <p className="mt-1 text-sm text-[#7A6A5E]">
-            What each would have set off immediately — the full paths stay yours to
+            What each would have set off immediately. The full paths stay yours to
             discover by replaying.
           </p>
           <div className="mt-3 space-y-2">

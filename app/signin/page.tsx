@@ -27,7 +27,7 @@ export default function SignInPage() {
 
       {!enabled ? (
         <div className="mt-6 rounded-xl border border-[#E7D6C4] bg-[#FBF3E9] p-4 text-sm leading-relaxed text-[#5A4A40]">
-          Accounts aren&rsquo;t configured on this deployment yet — every encounter is
+          Accounts aren&rsquo;t configured on this deployment yet, and every encounter is
           still fully playable without one.{" "}
           <Link href="/" className="text-[#8A5A44] underline">
             Back to encounters
@@ -35,7 +35,7 @@ export default function SignInPage() {
         </div>
       ) : sent ? (
         <div className="mt-6 rounded-xl border border-[#4FA39C] bg-[#EDF6F5] p-4 leading-relaxed text-[#2E4B48]">
-          Check your email — we sent a sign-in link to <strong>{email}</strong>.
+          Check your email. We sent a sign-in link to <strong>{email}</strong>.
         </div>
       ) : (
         <div className="mt-6 space-y-4">
@@ -77,7 +77,7 @@ export default function SignInPage() {
           </form>
           {error && <p className="text-sm text-[#A34A2E]">{error}</p>}
           <p className="text-xs leading-relaxed text-[#7A6A5E]">
-            No password, no profile forms — just a way to keep your learning
+            No password and no profile forms, just a way to keep your learning
             history yours.
           </p>
         </div>

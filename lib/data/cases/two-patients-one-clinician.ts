@@ -14,7 +14,7 @@ import type { ClinicalCase } from "../../types";
  */
 export const twoPatientsOneClinician: ClinicalCase = {
   id: "two-patients-one-clinician",
-  caseVersion: 6,
+  caseVersion: 7,
   title: "Two patients, one clinician",
   setting: "Emergency department, understaffed overnight shift",
   difficulty: "advanced",
@@ -1192,6 +1192,9 @@ export const twoPatientsOneClinician: ClinicalCase = {
             eleanor: {
               clinicalWellbeing: 1,
             },
+            marcus: {
+              trustRelationship: -1,
+            },
           },
           feedback: {
             immediate:
@@ -1200,8 +1203,8 @@ export const twoPatientsOneClinician: ClinicalCase = {
             institutional:
               "Normal roles restored and the board moving again.",
             ethical:
-              "Correct on both counts: the patient in front of you is safe and " +
-              "the nineteen people outside are finally being seen.",
+              "Eleanor is safe and the waiting room is moving. Marcus is on " +
+              "his own again.",
             delayed: [
               {
                 id: "nair-request",

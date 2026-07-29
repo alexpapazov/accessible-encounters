@@ -344,7 +344,7 @@ export default function BasicScene({
     <svg
       viewBox="0 0 680 400"
       role="img"
-      aria-label={`Scene: present — ${present
+      aria-label={`Scene: present, ${present
         .map((id) => `${charById.get(id)!.name} (${mood(id)})`)
         .join(", ")}. Time: ${timeOfDay}.`}
       className="w-full h-auto block"

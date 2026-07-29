@@ -216,7 +216,7 @@ export default function PatternsPage() {
 
       {analysis.modeComparisons.length === 0 && analysis.attemptCount > 0 && (
         <p className="mt-4 rounded-2xl border border-[#E7D6C4] bg-[#FBF3E9] p-5 leading-relaxed text-[#5A4A40]">
-          Play a case in <em>both</em> modes and this page will compare them —
+          Play a case in <em>both</em> modes and this page will compare them,
           same scenario, same values, different clock.
         </p>
       )}

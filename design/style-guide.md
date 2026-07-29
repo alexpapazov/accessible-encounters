@@ -151,6 +151,17 @@ clinician" (8 Word comments + chat notes).
 27f. **The results screen shows no outcome-summary box.** It goes from "The
     encounter is over" straight to "How the encounter went". Endings are
     reported by the score rows and the epilogue, not by a closing line.
+27g. **Every choice must show at least one gain and at least one cost.** Owner:
+    "for every choice there should always be a positive AND negative in some
+    categories." This is the Pareto rule made visible, and it has two halves:
+    - The data must carry both signs, counting per-patient effects.
+    - The interface must *draw* both. A cost stored only in `patientEffects`
+      and never rendered makes the choice read as a free win, which is worse
+      than having no cost at all.
+    Patient chips are labelled with the patient's name, e.g. "Eleanor: Trust
+    and relationship -1".
+27h. **Rule 1 covers interface text.** The dashes in headings and buttons are
+    held to the same standard as case prose.
 28. **Reading connections are a plain "Inspired by" list in the app.** Titles
     only, no explanation of the link. The longer connection notes stay in the
     review exports for the author and reviewers.

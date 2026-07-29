@@ -20,6 +20,7 @@ import type {
   Condition,
   DelayedOutcome,
   Effects,
+  PatientEffects,
   MetricState,
   NextRule,
   PathStep,
@@ -70,6 +71,7 @@ type Phase =
       kind: "impact";
       immediate: string;
       effects: Effects;
+      patientEffects?: PatientEffects;
       next: NextRule[];
     }
   /** Timed mode: the clock ran out; show what got chosen before its impact. */
@@ -80,11 +82,57 @@ type Phase =
       inactionText?: string;
       immediate: string;
       effects: Effects;
+      patientEffects?: PatientEffects;
       next: NextRule[];
     }
   | { kind: "daybreak"; toNodeId: string; delivered: DelayedOutcome[] };
 
 const metricLabel = (key: string) => METRICS.find((m) => m.key === key)?.label ?? key;
+
+/*
+ * Renders stakeholder effects and per-patient effects together. Patient costs
+ * were stored but never drawn, so a choice like "tell the daughter her mother
+ * is stable" read as pure gain when it also cost Eleanor's trust.
+ */
+function EffectChips({
+  effects,
+  patientEffects,
+  names,
+  small,
+}: {
+  effects?: Effects;
+  patientEffects?: PatientEffects;
+  names?: Record<string, string>;
+  small?: boolean;
+}) {
+  const items: { k: string; label: string; v: number }[] = [];
+  for (const [k, v] of Object.entries(effects ?? {})) {
+    if (v) items.push({ k, label: metricLabel(k), v: v as number });
+  }
+  for (const [pid, pe] of Object.entries(patientEffects ?? {})) {
+    for (const [k, v] of Object.entries(pe ?? {})) {
+      if (!v) continue;
+      const who = names?.[pid] ?? pid.charAt(0).toUpperCase() + pid.slice(1);
+      items.push({ k: `${pid}:${k}`, label: `${who}: ${metricLabel(k)}`, v: v as number });
+    }
+  }
+  if (!items.length) return null;
+  const pad = small ? "px-2.5 py-0.5" : "px-3 py-1";
+  return (
+    <>
+      {items.map(({ k, label, v }) => (
+        <span
+          key={k}
+          className={`rounded-full ${pad} text-xs font-medium ${
+            v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
+          }`}
+        >
+          {label} {v > 0 ? `+${v}` : v}
+        </span>
+      ))}
+    </>
+  );
+}
 
 const GRACE_MS = 2000;
 
@@ -123,6 +171,12 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
   const node = nodeById(c, nodeId);
   const isTerminal = node.choices.length === 0;
   const beat = phase.kind === "node" ? path.length + 1 : path.length;
+  /** id -> display name, so patient chips read "Eleanor: ..." not "eleanor: ...". */
+  const patientNames = Object.fromEntries(
+    c.characters
+      .filter((ch) => ch.role === "patient")
+      .map((ch) => [ch.id, ch.name.split(" ")[0]])
+  );
   const isTimed = mode === "timed";
   const hesRate = c.timing?.hesitationSecondsPerScenarioMinute;
 
@@ -266,12 +320,14 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
               dialogue: Boolean(choice.dialogue),
               immediate: choice.feedback.immediate,
               effects,
+              patientEffects,
               next: choice.next,
             }
           : {
               kind: "impact",
               immediate: choice.feedback.immediate,
               effects,
+              patientEffects,
               next: choice.next,
             }
     );
@@ -493,7 +549,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           >
             <p className="text-lg font-semibold text-[#3A2B26]">Time-constrained</p>
             <p className="mt-2 text-sm leading-relaxed text-[#5A4A40]">
-              Decisions expire. While you deliberate, the ward keeps moving —
+              Decisions expire. While you deliberate, the ward keeps moving,
               and if the bar empties, the system decides for you.
             </p>
             {c.timing?.leavingEndsAttempt && (
@@ -528,7 +584,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           </div>
           <h1 className="mt-4 text-2xl font-semibold text-[#3A2B26]">
             Day {target.day}
-            {target.timeOfDay ? ` — ${target.timeOfDay}` : ""}
+            {target.timeOfDay ? `, ${target.timeOfDay}` : ""}
           </h1>
           {target.dayBreak && (
             <p className="mx-auto mt-3 max-w-xl leading-relaxed text-[#5A4A40]">
@@ -653,7 +709,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
               Your first {branch.stepIndex} decision
               {branch.stepIndex === 1 ? "" : "s"} from the {branch.parentDate}{" "}
               attempt are preserved. From here, choose differently and see where
-              it leads — this saves as a linked counterfactual.
+              it leads. This saves as a linked counterfactual.
             </p>
           </div>
         )}
@@ -778,6 +834,7 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
           <FeedbackPanel
             choice={phase.choice}
             showScores={c.scoring === "standard"}
+            patientNames={patientNames}
             onContinue={() => advanceRules(phase.choice.next)}
           />
         )}
@@ -828,18 +885,11 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
               <p className="mt-1 text-lg leading-relaxed text-[#3A2B26]">{phase.immediate}</p>
               {c.scoring === "standard" && (
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {Object.entries(phase.effects).map(([k, v]) =>
-                    v ? (
-                      <span
-                        key={k}
-                        className={`rounded-full px-3 py-1 text-xs font-medium ${
-                          v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
-                        }`}
-                      >
-                        {metricLabel(k)} {v > 0 ? `+${v}` : v}
-                      </span>
-                    ) : null
-                  )}
+                  <EffectChips
+                    effects={phase.effects}
+                    patientEffects={phase.patientEffects}
+                    names={patientNames}
+                  />
                 </div>
               )}
               <p className="mt-3 text-sm italic text-[#7A6A5E]">
@@ -893,10 +943,12 @@ export default function CasePlayer({ clinicalCase: c }: Props) {
 function FeedbackPanel({
   choice,
   showScores,
+  patientNames,
   onContinue,
 }: {
   choice: Choice;
   showScores: boolean;
+  patientNames?: Record<string, string>;
   onContinue: () => void;
 }) {
   return (
@@ -908,18 +960,11 @@ function FeedbackPanel({
         </p>
         {showScores && (
           <div className="mt-3 flex flex-wrap gap-2">
-            {Object.entries(choice.effects).map(([k, v]) =>
-              v ? (
-                <span
-                  key={k}
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
-                  }`}
-                >
-                  {metricLabel(k)} {v > 0 ? `+${v}` : v}
-                </span>
-              ) : null
-            )}
+            <EffectChips
+              effects={choice.effects}
+              patientEffects={choice.patientEffects}
+              names={patientNames}
+            />
           </div>
         )}
       </div>
@@ -942,7 +987,7 @@ function FeedbackPanel({
 
       <div className="rounded-xl border-l-4 border-[#8A5A44] bg-[#FBF3E9] p-4">
         <p className="text-sm font-medium uppercase tracking-wide text-[#8A5A44]">
-          What this choice protected — and risked
+          What this choice protected and risked
         </p>
         <p className="mt-1 leading-relaxed text-[#3A2B26]">{choice.feedback.ethical}</p>
       </div>
@@ -988,6 +1033,12 @@ function Results({
   attemptId: string | null;
   onRestart: () => void;
 }) {
+  /** id -> display name, so patient chips read "Eleanor: ..." not "eleanor: ...". */
+  const patientNames = Object.fromEntries(
+    c.characters
+      .filter((ch) => ch.role === "patient")
+      .map((ch) => [ch.id, ch.name.split(" ")[0]])
+  );
   const [expanded, setExpanded] = useState<string | null>(null);
   const [openStep, setOpenStep] = useState<number | null>(null);
   const totals = stakeholderTotals(metrics);
@@ -1114,7 +1165,7 @@ function Results({
                     </span>
                   )}
                   {step.branchReason && (
-                    <span className="ml-1 italic text-[#7A6A5E]">— {step.branchReason}</span>
+                    <span className="ml-1 italic text-[#7A6A5E]">{step.branchReason}</span>
                   )}
                   {mode === "timed" && (
                     <span className="ml-1 text-[#8A5A44]">{isOpen ? "▴" : "▾"}</span>
@@ -1151,18 +1202,12 @@ function Results({
                       </>
                     ) : null}
                     <div className="flex flex-wrap gap-2 pt-1">
-                      {Object.entries(step.effectsApplied).map(([k, v]) =>
-                        v ? (
-                          <span
-                            key={k}
-                            className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                              v > 0 ? "bg-[#DFF0EE] text-[#2E6B66]" : "bg-[#FBE3DA] text-[#A34A2E]"
-                            }`}
-                          >
-                            {metricLabel(k)} {v > 0 ? `+${v}` : v}
-                          </span>
-                        ) : null
-                      )}
+                      <EffectChips
+                        effects={step.effectsApplied}
+                        patientEffects={step.patientEffectsApplied}
+                        names={patientNames}
+                        small
+                      />
                       <span className="rounded-full bg-white px-2.5 py-0.5 text-xs text-[#7A6A5E]">
                         decided in {(step.decisionMs / 1000).toFixed(1)}s
                       </span>
@@ -1221,7 +1266,7 @@ function Results({
           onClick={onRestart}
           className="rounded-xl bg-[#E88C6E] px-5 py-3 font-medium text-white transition-colors hover:bg-[#D97B5D]"
         >
-          Replay — choose differently
+          Replay and choose differently
         </button>
         <Link
           href="/"

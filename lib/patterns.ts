@@ -109,7 +109,7 @@ function buildPrompts(
     const alwaysTaken = [...counts.entries()].filter(([, n]) => n === list.length);
     if (alwaysTaken.length) {
       out.push(
-        `You made the same decision at ${alwaysTaken.length === 1 ? "one point" : `${alwaysTaken.length} points`} in every attempt at “${caseTitle(caseId)}”. What would have to be true about the shift — or about you — for that to change?`
+        `You made the same decision at ${alwaysTaken.length === 1 ? "one point" : `${alwaysTaken.length} points`} in every attempt at “${caseTitle(caseId)}”. What would have to be true about the shift, or about you, for that to change?`
       );
       break;
     }
@@ -127,7 +127,7 @@ function buildPrompts(
   );
   if (timedOut + inaction > 0)
     out.push(
-      `${timedOut + inaction} of your decisions were made by the clock rather than by you. Pick one: what were you actually doing in those seconds — weighing something, or avoiding it?`
+      `${timedOut + inaction} of your decisions were made by the clock rather than by you. Pick one: what were you actually doing in those seconds: weighing something, or avoiding it?`
     );
 
   // Never explored a counterfactual.
@@ -143,7 +143,7 @@ function buildPrompts(
     );
   else if (stake.patient > 0.5 && stake.doctor < 0)
     out.push(
-      "You have repeatedly spent your own integrity or stamina to protect patients. How many shifts can that be sustained — and what happens to your patients when it can't?"
+      "You have repeatedly spent your own integrity or stamina to protect patients. How many shifts can that be sustained, and what happens to your patients when it can't?"
     );
 
   if (metrics.professionalIntegrity < -0.5)
@@ -164,7 +164,7 @@ function buildStatements(
   if (count === 0) return [];
   if (count < 2)
     return [
-      "One completed encounter isn't a pattern yet. Play a few more — including the same case a second way — and this section will start showing what your choices consistently protect and consistently spend.",
+      "One completed encounter isn't a pattern yet. Play a few more, including the same case a second way, and this section will start showing what your choices consistently protect and consistently spend.",
     ];
 
   const out: string[] = [];
@@ -177,7 +177,7 @@ function buildStatements(
   if (metrics[bottom.key] < 0)
     out.push(
       `They have most often come at the cost of ${label(bottom.key)}${
-        metrics[top.key] > 0 ? " — that is the trade you keep making" : ""
+        metrics[top.key] > 0 ? ", which is the trade you keep making" : ""
       }.`
     );
 
@@ -189,7 +189,7 @@ function buildStatements(
     );
   else if (institution > 0.5 && patient < -0.5)
     out.push(
-      "Your decisions have most consistently satisfied institutional demands — efficiency, throughput, compliance — and patients have absorbed the difference."
+      "Your decisions have most consistently satisfied institutional demands such as efficiency, throughput, and compliance, and patients have absorbed the difference."
     );
   else if (patient > 0.5 && doctor < -0.5)
     out.push(
@@ -198,7 +198,7 @@ function buildStatements(
 
   if (metrics.professionalIntegrity < -0.5)
     out.push(
-      "Professional integrity has more often been spent than protected across your attempts — the accumulation the readings name as moral injury."
+      "Professional integrity has more often been spent than protected across your attempts. The readings name that accumulation moral injury."
     );
   if (metrics.personalSustainability < -0.5)
     out.push(
@@ -250,7 +250,7 @@ function interpretModeShift(
   const fell = rows.filter((r) => r.delta < -0.4).sort((a, b) => a.delta - b.delta);
 
   if (!rose.length && !fell.length)
-    return "Your decisions held remarkably steady across both modes — the clock changed how it felt, but not what you protected.";
+    return "Your decisions held remarkably steady across both modes. The clock changed how it felt, but not what you protected.";
 
   const parts: string[] = [];
   if (rose.length)
@@ -273,7 +273,7 @@ function interpretModeShift(
     rows.find((r) => r.key === "agencyDignity")!.delta < -0.4;
   if (effUp && valuesDown)
     sentence +=
-      " You acted faster and moved the department along, and the things that gave way were the patient's control and your own sense of defensible practice. That gap — between what you value with time to think and what you do without it — is the finding.";
+      " You acted faster and moved the department along, and the things that gave way were the patient's control and your own sense of defensible practice. That gap between what you value with time to think and what you do without it is the finding.";
   else if (!fell.length)
     sentence += " Pressure sharpened your practice without costing anyone.";
 
