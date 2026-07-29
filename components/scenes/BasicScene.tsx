@@ -459,6 +459,33 @@ export default function BasicScene({
                 gazeDy={gazeDy}
               />
             )}
+            {/*
+              Name label under every figure, in every scene, so the player can
+              always tell who is who without reading back through the prose.
+            */}
+            <g>
+              <rect
+                x={-(ch.name.length * 3.6 + 9)}
+                y={334}
+                width={ch.name.length * 7.2 + 18}
+                height={20}
+                rx={10}
+                fill="#FFFFFF"
+                fillOpacity={0.94}
+                stroke={pal.frame}
+                strokeWidth="1"
+              />
+              <text
+                x={0}
+                y={348}
+                textAnchor="middle"
+                fontSize="12.5"
+                fill="#3A2B26"
+                fontFamily="inherit"
+              >
+                {ch.name}
+              </text>
+            </g>
             {ch.role === "clinician" && scene.focus === "notes" && (
               <g>
                 <rect x="21" y="248" width="26" height="34" rx="3" fill="#F7F2E9" stroke={pal.frame} strokeWidth="1.5" />

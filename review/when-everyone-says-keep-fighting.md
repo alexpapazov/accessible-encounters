@@ -18,7 +18,7 @@
 
 - **Case id:** `when-everyone-says-keep-fighting` (v1)
 - **Setting:** Cancer ward, four days before a discharge decision
-- **Difficulty:** advanced · **Modes:** deliberative, timed · **Scoring:** standard
+- **Difficulty:** advanced · **Modes:** deliberative · **Scoring:** standard
 - **Review status:** draft
 
 ## Characters
@@ -352,7 +352,7 @@ Daniel is alone for once. He tells you he has been planning his funeral music an
 
 ## Node: Two in the morning `the-night`
 
-*day 2 · night · ⏱ 45s timer · present — Daniel Mercer, You, Nurse Okafor · Daniel Mercer: agitated, Nurse Okafor: engaged*
+*day 2 · night · present — Daniel Mercer, You, Nurse Okafor · Daniel Mercer: agitated, Nurse Okafor: engaged*
 
 *Caption: That night*
 
@@ -360,15 +360,11 @@ Daniel is alone for once. He tells you he has been planning his funeral music an
 
 Daniel's pain breaks through at two in the morning. Nurse Okafor has given what she can give without you. The full dose written on his chart will settle it and will also keep him drowsy through most of tomorrow. A lower dose will leave him uncomfortable and awake. His daughter is visiting in the morning and he has asked twice when she is coming.
 
-**Situation (timed-mode override):**
-
-Two in the morning. Daniel's pain has broken through and Nurse Okafor has given what she can without you. The full dose settles it and leaves him drowsy through tomorrow. A lower dose leaves him awake and uncomfortable. His daughter visits in the morning.
-
 **Daniel Mercer's view:**
 
 > Daniel wants the pain to stop. He also wants to be awake when his daughter comes. He has not been asked which one matters more.
 
-### Choice 1 `tn-full` — TIME-SAVER
+### Choice 1 `tn-full`
 
 **Give the full dose on the chart.**
 
@@ -578,17 +574,13 @@ Ellen has asked for a family meeting. Nora has driven up and is in the corridor.
 
 ## Node: The last decision `discharge-day`
 
-*day 4 · morning · ⏱ 60s timer · present — Daniel Mercer, You, Ellen Mercer · Daniel Mercer: exhausted, Ellen Mercer: fearful*
+*day 4 · morning · present — Daniel Mercer, You, Ellen Mercer · Daniel Mercer: exhausted, Ellen Mercer: fearful*
 
 **Day-break narration:** Daniel is weaker again. The transport is booked for eleven o'clock and the community nurse can start tomorrow. His blood pressure is low and his pain needed two extra doses overnight.
 
 **Situation:**
 
 This is the last morning it is possible to send him home before the wedding. He is sicker than he was on Monday. There is a real chance he dies in the ambulance or in the first night at home. There is also a real chance that if he stays, he dies here in about the same amount of time, having missed it. Ellen is asking you to say he is too unwell. Daniel is watching you rather than her.
-
-**Situation (timed-mode override):**
-
-The last morning it is possible to send him home before the wedding. He is sicker than he was on Monday. He could die on the way or in the first night at home. He could also die here in about the same time, having missed it. Ellen is asking you to say he is too unwell.
 
 **Daniel Mercer's view:**
 
@@ -626,7 +618,7 @@ The last morning it is possible to send him home before the wedding. He is sicke
 
 **Delayed (after T+0):** The community nurse used the plan on the first night. Ellen did not have to call an ambulance.
 
-### Choice 3 `dd-keep` — TIME-SAVER
+### Choice 3 `dd-keep`
 
 **Tell him he is too unwell to go.**
 

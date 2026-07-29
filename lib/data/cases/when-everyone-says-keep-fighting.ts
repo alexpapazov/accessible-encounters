@@ -32,7 +32,7 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
   setting: "Cancer ward, four days before a discharge decision",
   difficulty: "advanced",
   reviewStatus: "draft",
-  modes: ["deliberative", "timed"],
+  modes: ["deliberative"],
   scoring: "standard",
   characters: [
     { id: "clinician", name: "You", role: "clinician", archetype: "clinician" },
@@ -75,10 +75,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
     "Weigh pain control against alertness when a patient still has things to say",
     "Decide whether to support a risky discharge the patient has asked for",
   ],
-  timing: {
-    hesitationSecondsPerScenarioMinute: 30,
-    decisionSpeed: [{ withinSeconds: 20, delta: 1 }],
-  },
   startNodeId: "corridor",
   nodes: [
     /* ------------------------------------------------------------ */
@@ -747,7 +743,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
       day: 2,
       timeOfDay: "night",
       inlineCaption: "That night",
-      timerSeconds: 45,
       scene: {
         setting: "clinic",
         present: ["daniel", "clinician", "nurse"],
@@ -761,14 +756,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         "tomorrow. A lower dose will leave him uncomfortable and awake. His " +
         "daughter is visiting in the morning and he has asked twice when she " +
         "is coming.",
-      timedOverrides: {
-        situation:
-          "Two in the morning. Daniel's pain has broken through and Nurse " +
-          "Okafor has given what she can without you. The full dose settles it " +
-          "and leaves him drowsy through tomorrow. A lower dose leaves him " +
-          "awake and uncomfortable. His daughter visits in the morning.",
-        hidePerspectives: true,
-      },
       perspectives: [
         {
           characterId: "daniel",
@@ -781,7 +768,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         {
           id: "tn-full",
           label: "Give the full dose on the chart.",
-          timeSaver: true,
           effects: {
             clinicalWellbeing: 1,
             operationalEfficiency: 1,
@@ -1225,7 +1211,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
       title: "The last decision",
       day: 4,
       timeOfDay: "morning",
-      timerSeconds: 60,
       dayBreak: {
         narration:
           "Daniel is weaker again. The transport is booked for eleven o'clock " +
@@ -1245,15 +1230,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         "a real chance that if he stays, he dies here in about the same amount " +
         "of time, having missed it. Ellen is asking you to say he is too " +
         "unwell. Daniel is watching you rather than her.",
-      timedOverrides: {
-        situation:
-          "The last morning it is possible to send him home before the " +
-          "wedding. He is sicker than he was on Monday. He could die on the " +
-          "way or in the first night at home. He could also die here in about " +
-          "the same time, having missed it. Ellen is asking you to say he is " +
-          "too unwell.",
-        hidePerspectives: true,
-      },
       perspectives: [
         {
           characterId: "daniel",
@@ -1367,7 +1343,6 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
         {
           id: "dd-keep",
           label: "Tell him he is too unwell to go.",
-          timeSaver: true,
           effects: {
             riskCompliance: 3,
             operationalEfficiency: 1,
