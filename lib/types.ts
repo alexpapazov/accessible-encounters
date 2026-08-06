@@ -415,6 +415,12 @@ export interface ClinicalCase {
   epilogue: Epilogue;
   /** Course readings this case connects with — its own section, never per-choice. */
   readingConnections: ReadingConnection[];
+  /**
+   * Author's note on how the readings shaped the case, shown under the
+   * "Inspired by" list. Added 2026-07-29 at the owner's request; it reverses
+   * the earlier rule that the section list titles and nothing else.
+   */
+  inspiredByNote?: string;
 }
 
 /* ------------------------------------------------------------------ */

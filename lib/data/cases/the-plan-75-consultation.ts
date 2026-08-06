@@ -1263,6 +1263,25 @@ export const thePlan75Consultation: ClinicalCase = {
       "If the housing office had answered in two days instead of six weeks, would you have signed?",
     ],
   },
+  inspiredByNote:
+    "This scenario adapts Plan 75 into an interactive clinical encounter " +
+    "while grounding its ethical questions in the broader course themes. " +
+    "The film argues that state-assisted death becomes “coercion " +
+    "disguised as choice” when poverty, loneliness, and social " +
+    "abandonment make death appear reasonable. Ozawa-de Silva likewise " +
+    "argues that loneliness is not merely an individual problem but a " +
+    "social condition rooted in the absence of “relational meaning,” the " +
+    "sense that one's life matters through reciprocal relationships. " +
+    "Nobel similarly frames loneliness as a public-health issue rather " +
+    "than a private failing, while Gawande reminds us that medicine must " +
+    "ask what matters to patients instead of defaulting to technical " +
+    "solutions. Thornber's concept of structural violence further shifts " +
+    "attention away from individual choice toward the social conditions " +
+    "producing suffering. Rather than asking whether Plan 75 is " +
+    "inherently right or wrong, the scenario asks whether Toshio's " +
+    "decision is truly autonomous or whether economic precarity, " +
+    "isolation, and institutional efficiency have narrowed his available " +
+    "choices.",
   readingConnections: [
     {
       source: "Plan 75, directed by Chie Hayakawa",

@@ -1713,6 +1713,28 @@ export const twoPatientsOneClinician: ClinicalCase = {
       "When you replay this under the clock, watch which of your values gives way first.",
     ],
   },
+  inspiredByNote:
+    "This scenario is directly inspired by Eyal Press's account of Dr. " +
+    "Keith Corl, who was forced to choose between “a mentally ill woman” " +
+    "and “a patient with possible sepsis,” leaving him feeling that he " +
+    "had violated his own values. Rather than presenting medicine as a " +
+    "series of correct answers, Press argues that profit-driven systems " +
+    "create moral injury by forcing physicians to choose between " +
+    "patients, institutions, and their own ethics. The timed format " +
+    "recreates this pressure: there is no perfect option because the " +
+    "institution has already failed. Bleakley similarly argues that " +
+    "medicine suffers when “technical capital” overwhelms “sensibility " +
+    "capital,” and that democratic, collaborative care must replace rigid " +
+    "hierarchy and certainty. Rea and Wilkes reinforce that " +
+    "professionalism is reciprocal: institutions must “hear, protect, " +
+    "prepare, support, and care for” clinicians instead of relying on " +
+    "personal resilience. Finally, Voices from the Front Lines emphasizes " +
+    "that crises expose “ethical tensions” between scarce resources, " +
+    "professional duty, and individual needs. Together, these readings " +
+    "shaped a scenario in which every decision protects one value while " +
+    "compromising another, illustrating that ethical medicine often means " +
+    "navigating competing obligations rather than identifying a single " +
+    "correct answer.",
   readingConnections: [
     {
       source: "Eyal Press, 'The Moral Crisis of America's Doctors' (NYT, 2023)",

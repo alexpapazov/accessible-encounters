@@ -1379,6 +1379,23 @@ export const whenEveryoneSaysKeepFighting: ClinicalCase = {
       "If he had died on the way home, would you still say the discharge was right?",
     ],
   },
+  inspiredByNote:
+    "This scenario brings together several course texts that reject the " +
+    "idea that death is synonymous with medical failure. Gawande argues " +
+    "that medicine has become exceptionally good at prolonging life while " +
+    "remaining poorly equipped to discuss “what matters most,” often " +
+    "replacing honest conversation with a “shared delusion” that more " +
+    "treatment is always better. Tolstoy similarly shows how Ivan Ilyich " +
+    "is surrounded by “the lie” that he might recover, while Gerasim " +
+    "alone acknowledges his suffering honestly. Thornber distinguishes " +
+    "cure from healing, arguing that healing “remains possible even when " +
+    "cure is not.” Welsh extends this idea by defining a good death " +
+    "through autonomy, relationships, and meaning rather than biological " +
+    "survival, while Watt's memoir demonstrates that illness transforms " +
+    "identity rather than simply interrupting it. Together these readings " +
+    "inspired a scenario where the central ethical question is not " +
+    "whether Daniel survives, but whether he retains the authority to " +
+    "define what living well, and dying well, mean for himself.",
   readingConnections: [
     {
       source: "Leo Tolstoy, The Death of Ivan Ilyich",

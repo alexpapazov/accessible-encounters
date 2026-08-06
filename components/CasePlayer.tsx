@@ -1256,6 +1256,9 @@ export function Results({
               </li>
             ))}
           </ul>
+          {c.inspiredByNote && (
+            <p className="mt-4 leading-relaxed text-[#5A4A40]">{c.inspiredByNote}</p>
+          )}
         </div>
       )}
 

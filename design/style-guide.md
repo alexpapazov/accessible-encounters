@@ -191,9 +191,17 @@ clinician" (8 Word comments + chat notes).
 27j. **No metric effects on delayed outcomes delivered at an ending.** Routing
     resolves before those land, so an effect there can make the epilogue
     disagree with the ending the player was given.
-28. **Reading connections are a plain "Inspired by" list in the app.** Titles
-    only, no explanation of the link. The longer connection notes stay in the
-    review exports for the author and reviewers.
+28. **Reading connections are a plain "Inspired by" list in the app**, followed
+    by the author's note. REVISED 2026-07-29: the section originally listed
+    titles and nothing else, at the owner's instruction. The owner has since
+    written a paragraph per scenario explaining how the readings shaped it and
+    asked for it to appear there, so the section is now the title list plus that
+    note (`inspiredByNote` on the case). Do not "restore" the titles-only
+    version. The per-reading `connection` strings still stay out of the app and
+    go to the review exports.
+28a. **The owner's own prose is inserted as written**, with two exceptions:
+    strip artifacts from the source document, and convert dashes to commas or
+    colons so the page matches rule 13. Say which changes were made.
 29. **Patient expressions must match the patient's actual condition.** A
     deteriorating patient is never drawn looking relieved. The engine overrides
     the authored mood from the patient's own clinical well-being, so the

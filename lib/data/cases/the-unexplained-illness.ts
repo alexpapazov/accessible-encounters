@@ -1160,6 +1160,25 @@ export const theUnexplainedIllness: ClinicalCase = {
       "If the next clinician reads only your summary, who do they meet?",
     ],
   },
+  inspiredByNote:
+    "Priya's story is primarily inspired by Meghan O'Rourke's The " +
+    "Invisible Kingdom, which describes chronic illness as existing " +
+    "within an “invisible kingdom” where patients face fluctuating " +
+    "symptoms, disbelief, and diagnostic uncertainty. Like O'Rourke, " +
+    "Priya encounters fragmented specialization, acute-care bias, and " +
+    "repeated medical gaslighting as each clinician focuses on one organ " +
+    "rather than assembling the broader pattern. Her environmental " +
+    "exposures draw on Slovic and colleagues' concept of environmental " +
+    "entanglement and stratified vulnerability, recognizing that bodies " +
+    "and environments continually shape one another rather than existing " +
+    "separately. Thornber's distinction between disease and illness also " +
+    "informs the case by emphasizing that the subjective experience of " +
+    "suffering extends beyond laboratory findings. Finally, Bleakley " +
+    "argues that medicine must tolerate ambiguity rather than forcing " +
+    "certainty where none exists. Accordingly, the scenario's best ending " +
+    "is not a dramatic diagnosis but an honest partnership in which " +
+    "uncertainty remains open, the patient's experience is believed, and " +
+    "care continues even when definitive answers do not.",
   readingConnections: [
     {
       source: "Meghan O'Rourke, The Invisible Kingdom",
